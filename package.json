@@ -1,0 +1,159 @@
+{
+  "name": "boundary-move",
+  "displayName": "BoundaryMove",
+  "description": "move and jump cursors to bounday.",
+  "publisher": "BlueSilverCat",
+  "license": "MIT",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.47.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "cursor",
+    "move",
+    "jump",
+    "word boundary"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "colors": [
+      {
+        "id": "boundaryMove.markerColor",
+        "description": "MakerColor",
+        "defaults": {
+          "dark": "#222222",
+          "light": "#dddddd",
+          "highContrast": "#000000"
+        }
+      },
+      {
+        "id": "boundaryMove.markerBackgroundColor",
+        "description": "MarkerBackgroundColor",
+        "defaults": {
+          "dark": "#dddddd",
+          "light": "#222222",
+          "highContrast": "#ffffff"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "BoundaryMove",
+      "properties": {
+        "boundary-move.markerMargin": {
+          "type": "string",
+          "default": "0ex 0.3ex 0ex 0.7ex",
+          "description": "Marker magin."
+        },
+        "boundary-move.capitalLetter": {
+          "type": "boolean",
+          "default": true,
+          "description": "Detect capital letter."
+        },
+        "boundary-move.specialCharacters": {
+          "type": "string",
+          "default": "\"'`",
+          "description": "This characters are always decided as boundary."
+        },
+        "boundary-move.japanese": {
+          "type": "boolean",
+          "default": false,
+          "description": "For Japanese user. Improve Japanese boundary."
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "key": "left",
+        "command": "BM.moveLeft",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "right",
+        "command": "BM.moveRight",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "shift+left",
+        "command": "BM.selectLeft",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "shift+right",
+        "command": "BM.selectRight",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "ctrl+left",
+        "command": "cursorLeft",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "ctrl+right",
+        "command": "cursorRight",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "ctrl+shift+left",
+        "command": "cursorLeftSelect",
+        "when": "textInputFocus"
+      },
+      {
+        "key": "ctrl+shift+right",
+        "command": "cursorRightSelect",
+        "when": "textInputFocus"
+      }
+    ],
+    "commands": [
+      {
+        "command": "BM.jump",
+        "title": "BoundaryMove: jump"
+      },
+      {
+        "command": "BM.jumpLine",
+        "title": "BoundaryMove: jump line"
+      },
+      {
+        "command": "BM.moveLeft",
+        "title": "BoundaryMove: Move Left"
+      },
+      {
+        "command": "BM.moveRight",
+        "title": "BoundaryMove: Move Right"
+      },
+      {
+        "command": "BM.selectLeft",
+        "title": "BoundaryMove: Select Left"
+      },
+      {
+        "command": "BM.selectRight",
+        "title": "BoundaryMove: Select Right"
+      },
+      {
+        "command": "BM.info",
+        "title": "BoundaryMove: Info"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.47.0",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "eslint": "^6.8.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.1.2",
+    "typescript": "^3.8.3",
+    "vscode-test": "^1.3.0"
+  }
+}
