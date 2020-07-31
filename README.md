@@ -4,6 +4,8 @@
 The difference from `cursorWordPartRight/cursorWordPartLeft` commands is the stop position.
 This extension sets stop positions in more detail.
 
+![capture](https://raw.githubusercontent.com/BlueSilverCat/boundary-move/image/image/capture.gif)
+
 ## Features
 
 - move: Move cursors to the left/right boundary.
