@@ -9,7 +9,7 @@ function activate(context) {
   const name = "BoundaryMove";
   const channel = vscode.window.createOutputChannel(`${name}`);
   channel.appendLine(`${name}: activate`);
-  const config = vscode.workspace.getConfiguration("boundary-move");
+  const config = vscode.workspace.getConfiguration("boundaryMove");
   const bm = new boundary.BoundaryManager(channel, config);
   vscodeUtil.registerCommand(context, "BM.moveLeft", moveLeft);
   vscodeUtil.registerCommand(context, "BM.moveRight", moveRight);
@@ -21,8 +21,8 @@ function activate(context) {
 
   vscode.workspace.onDidChangeConfiguration(
     (event) => {
-      if (event.affectsConfiguration("boundary-move") === true) {
-        bm.config(vscode.workspace.getConfiguration("boundary-move"));
+      if (event.affectsConfiguration("boundaryMove") === true) {
+        bm.config(vscode.workspace.getConfiguration("boundaryMove"));
       }
     },
     null,

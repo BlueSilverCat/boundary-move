@@ -17,6 +17,13 @@
     "jump",
     "word boundary"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BlueSilverCat/boundary-move.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BlueSilverCat/boundary-move/issues"
+  },
   "activationEvents": [
     "*"
   ],
@@ -45,22 +52,22 @@
     "configuration": {
       "title": "BoundaryMove",
       "properties": {
-        "boundary-move.markerMargin": {
+        "boundaryMove.markerMargin": {
           "type": "string",
           "default": "0ex 0.3ex 0ex 0.7ex",
           "description": "Marker magin."
         },
-        "boundary-move.capitalLetter": {
+        "boundaryMove.capitalLetter": {
           "type": "boolean",
           "default": true,
           "description": "Detect capital letter."
         },
-        "boundary-move.specialCharacters": {
+        "boundaryMove.specialCharacters": {
           "type": "string",
           "default": "\"'`",
           "description": "This characters are always decided as boundary."
         },
-        "boundary-move.japanese": {
+        "boundaryMove.japanese": {
           "type": "boolean",
           "default": false,
           "description": "For Japanese user. Improve Japanese boundary."
