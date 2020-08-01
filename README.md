@@ -1,7 +1,7 @@
 # Boundary Move
 
-`Boundary Move` improve cursor move like as `cursorWordPartRight/cursorWordPartLeft` commands.
-The difference from `cursorWordPartRight/cursorWordPartLeft` commands is the stop position.
+`Boundary Move` improve cursor move like as `cursorWordPartRight/cursorWordPartLeft` commands.  
+The difference from `cursorWordPartRight/cursorWordPartLeft` commands is the stop position.  
 This extension sets stop positions in more detail.
 
 ![capture](https://raw.githubusercontent.com/BlueSilverCat/boundary-move/image/image/capture.gif)
@@ -50,7 +50,7 @@ With the default settings, stop positions are as below.
 ‾Cat‾Like‾Tuna‾
 ```
 
-If you want to stop between upper letter and lower letter, set `boundary-move.capitalLetter` to `false`.
+If you want to stop between upper letter and lower letter, set `boundary-move.capitalLetter` to `false`.  
 Then stop positions are as below.
 
 ```
@@ -65,15 +65,15 @@ If text is as below.
 "Cat", "", "Dog",
 ```
 
-`cursorWordPartRight/cursorWordPartLeft` stop positions are as below.
+`cursorWordPartRight/cursorWordPartLeft` stop positions are as below.  
 Cannot stop between double quotations.
 
 ```
 ‾"‾Cat‾",‾ ‾"",‾ ‾"‾Dog‾",‾
 ```
 
-If you want to stop between double quotations.
-Set `"` to `boundary-move.specialCharacters`.
+If you want to stop between double quotations.  
+Set `"` to `boundary-move.specialCharacters`.  
 Then stop positions are as below.
 
 ```
@@ -102,7 +102,7 @@ This extension(with default settings) stop positions are as below.
 ‾猫は‾、‾マグロが大好きです‾。‾
 ```
 
-If you set `boundary-move.japanese` to `true`.
+If you set `boundary-move.japanese` to `true`.  
 Then stop positions are as below.
 
 ```
