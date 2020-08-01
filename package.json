@@ -1,7 +1,7 @@
 {
   "name": "boundary-move",
   "displayName": "BoundaryMove",
-  "description": "move and jump cursors to bounday.",
+  "description": "move and jump cursors to boundary.",
   "publisher": "BlueSilverCat",
   "license": "MIT",
   "version": "0.0.1",
