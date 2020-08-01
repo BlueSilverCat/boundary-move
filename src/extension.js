@@ -167,6 +167,7 @@ function activate(context) {
     const result = await vscode.window.showInputBox({
       placeHolder: rangeString,
       prompt: `Input boundary index for jump. ${rangeString}`,
+      value: "a",
     });
     if (vscodeUtil.isEmpty(result) === true) {
       return -1;
