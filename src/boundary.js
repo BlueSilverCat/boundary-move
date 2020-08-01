@@ -826,30 +826,24 @@ class BoundaryManager {
    * @param {{ range: vscode.Range, textContent: string, lineIndex: number, index: number }[][]} decorationRanges
    * @param {string} textContent
    * @return {{ lineIndex: number, count: number }}
+   * 線形探索になってしまっている
+   * need fix: "aaa"が来た場合、"a aa", "aa a"の2つが考えられる。現状2つを判定できない
+   * 入力形式を変える "1aa", "27a". "a-aa", "aa-a". "Aa", "AAa".
+   * 数値の割り振り方を変える
    */
   search(decorationRanges, textContent) {
     const target = vscodeUtil.convertToNumber(textContent);
-    let [bottom, top] = [0, decorationRanges.length - 1];
-    let lineIndex = 0;
-    let lineDecorationRanges = [];
     let min = 0;
     let max = 0;
     let index = 0;
-    while (bottom <= top) {
-      lineIndex = DocumentBoundary.getMiddle(bottom, top);
-      lineDecorationRanges = decorationRanges[lineIndex];
+    for (const lineDecorationRanges of decorationRanges) {
       min = vscodeUtil.convertToNumber(lineDecorationRanges[0].textContent);
       max = vscodeUtil.convertToNumber(lineDecorationRanges[lineDecorationRanges.length - 1].textContent);
-      if (target < min) {
-        top = lineIndex - 1;
-      } else if (target > max) {
-        bottom = lineIndex + 1;
-      } else {
+      if (target >= min && target <= max) {
         index = DocumentBoundary.search(lineDecorationRanges, target, "eq", BoundaryManager.compare);
-        if (index === -1) {
-          return null;
+        if (index !== -1) {
+          return { lineIndex: lineDecorationRanges[index].lineIndex, count: lineDecorationRanges[index].index };
         }
-        return { lineIndex: lineDecorationRanges[index].lineIndex, count: lineDecorationRanges[index].index };
       }
     }
     return null;
