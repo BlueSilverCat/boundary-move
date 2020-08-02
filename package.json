@@ -78,42 +78,42 @@
       {
         "key": "left",
         "command": "BM.moveLeft",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "right",
         "command": "BM.moveRight",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "shift+left",
         "command": "BM.selectLeft",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "shift+right",
         "command": "BM.selectRight",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+left",
         "command": "cursorLeft",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+right",
         "command": "cursorRight",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+shift+left",
         "command": "cursorLeftSelect",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+shift+right",
         "command": "cursorRightSelect",
-        "when": "textInputFocus"
+        "when": "editorTextFocus"
       }
     ],
     "commands": [
