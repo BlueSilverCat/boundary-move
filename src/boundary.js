@@ -643,8 +643,8 @@ class BoundaryManager {
       this.modify(diff, index, lineIndex.start);
       if (diff >= 0) {
         lineIndex.end += diff;
-        this.documentBoundaries[index].changeLines(event.document, lineIndex);
       }
+      this.documentBoundaries[index].changeLines(event.document, lineIndex);
     }
     statusBar.dispose();
     statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanEndMessage, BoundaryManager.MessageTimeout);
