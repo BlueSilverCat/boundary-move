@@ -11,9 +11,9 @@ This extension sets stop positions in more detail.
 - move: Move cursors to the left/right boundary.
 - select: Select from current position to the left/right boundary.
 - jump: Jump cursors to the specified position.
-  - jump
+  - `jump`  
     Input destination directly.
-  - jump line
+  - `jump line`  
     Input lineNumber then input destination.
 
 ### Stop position
