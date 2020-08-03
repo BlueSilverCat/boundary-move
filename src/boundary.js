@@ -641,9 +641,7 @@ class BoundaryManager {
       lineIndex.end = change.range.end.line;
       diff = event.document.lineCount - this.documentBoundaries[index].lineBoundaries.length;
       this.modify(diff, index, lineIndex.start);
-      if (diff >= 0) {
-        lineIndex.end += diff;
-      }
+      lineIndex.end += diff;
       this.documentBoundaries[index].changeLines(event.document, lineIndex);
     }
     statusBar.dispose();
