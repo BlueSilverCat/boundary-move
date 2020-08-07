@@ -1,6 +1,4 @@
 node_modules
 .vscode-test/
 *.vsix
-test
-todo.txt
 image

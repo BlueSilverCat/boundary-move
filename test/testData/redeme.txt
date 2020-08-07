@@ -1,0 +1,13 @@
+```
+function func1(){}
+function‾ func1‾(){}‾
+```
+
+```
+function func1(){}
+function‾ ‾func‾1‾(‾)‾{‾}‾
+```
+
+```
+猫は、マグロが大好きです。
+```

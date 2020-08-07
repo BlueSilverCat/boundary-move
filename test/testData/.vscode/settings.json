@@ -1,0 +1,10 @@
+{
+  "boundary-move.specialCharacters": "\"'`",
+  "boundary-move.capitalLetter": true,
+  "boundary-move.japanese": false,
+  "boundary-move.markerMargin": "0ex 0.3ex 0ex 0.7ex",
+  "boundaryMove.specialCharacters": "\"'`",
+  "boundaryMove.capitalLetter": true,
+  "boundaryMove.japanese": true,
+  "boundaryMove.markerMargin": "0ex 0.3ex 0ex 0.7ex"
+}
