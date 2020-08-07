@@ -495,37 +495,37 @@ async function vsReplaceLine(document, lineIndex, string) {
 //   return result;
 // }
 
-// function getTextDocumentContentChangeEventInfo(event, eol = true) {
+// function getTextDocumentChangeEventInfo(event, separator = "\n") {
 //   let result = "";
-//   result += `range: ${getRangeInfo(event.range)}\n`;
-//   result += `rangeLength: ${event.rangeLength}\n`;
-//   result += `rangeOffset: ${event.rangeOffset}\n`;
-//   result += `text: ${event.text}\n`;
-//   if (eol === false) {
-//     result = result.replace(/\n/g, ", ");
+//   for (const contentChange of event.contentChanges) {
+//     result += `range: \n${getRangeInfo(contentChange.range)}${separator}`;
+//     result += `rangeLength: ${contentChange.rangeLength}${separator}`;
+//     result += `rangeOffset: ${contentChange.rangeOffset}${separator}`;
+//     result += `psitionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
+//     result += `psitionAt: ${getPositionInfo(
+//       event.document.positionAt(contentChange.rangeOffset + contentChange.rangeLength),
+//       ", "
+//     )}${separator}`;
+//     result += `text: ${contentChange.text}${separator}`;
 //   }
+//   const re = new RegExp(`${separator}$`);
+//   result = result.replace(re, "");
 //   return result;
 // }
 
-// function getRangeInfo(range, eol = true) {
+// function getRangeInfo(range, separator = "\n") {
 //   let result = "";
-//   result += `start: ${getPositionInfo(range.start, false)}\n`;
-//   result += `end: ${getPositionInfo(range.end, false)}\n`;
-//   result += `isEmpty: ${range.isEmpty}\n`;
-//   result += `isSingleLine: ${range.isSingleLine}\n`;
-//   if (eol === false) {
-//     result = result.replace(/\n/g, ", ");
-//   }
+//   result += `start: ${getPositionInfo(range.start, ", ")}${separator}`;
+//   result += `end: ${getPositionInfo(range.end, ", ")}${separator}`;
+//   result += `isEmpty: ${range.isEmpty}${separator}`;
+//   result += `isSingleLine: ${range.isSingleLine}`;
 //   return result;
 // }
 
-// function getPositionInfo(position, eol = true) {
+// function getPositionInfo(position, separator = "\n") {
 //   let result = "";
-//   result += `line: ${position.line}\n`;
-//   result += `character: ${position.character}\n`;
-//   if (eol === false) {
-//     result = result.replace(/\n/g, ", ");
-//   }
+//   result += `line: ${position.line}${separator}`;
+//   result += `character: ${position.character}`;
 //   return result;
 // }
 
@@ -564,4 +564,4 @@ exports.vsReplaceLine = vsReplaceLine;
 // exports.getLastActiveEditor = getLastActiveEditor;
 // exports.getEditorInfo = getEditorInfo;
 // exports.getRangeInfo = getRangeInfo;
-// exports.getTextDocumentContentChangeEventInfo = getTextDocumentContentChangeEventInfo;
+// exports.getTextDocumentChangeEventInfo = getTextDocumentChangeEventInfo;
