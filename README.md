@@ -143,6 +143,9 @@ Then stop positions are as below.
 
   // Improve Japanse boundary.
   "boundary-move.japanese": false,
+
+  // Zoom out before jump.
+  "boundaryMove.jumpZoomOut": true
 ```
 
 ## Marker Color

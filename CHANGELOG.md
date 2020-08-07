@@ -1,5 +1,20 @@
 # Change Log
 
+## [0.1.0] 2020/08/07
+
+### [Added]
+
+- Zoom out before jump.
+
+### [Changed]
+
+- Chnage JumpMarker style
+- Add target file scheme
+
+### [Fixed]
+
+- Detect change event
+
 ## [0.0.4] 2020/08/02
 
 ### [Fixed]

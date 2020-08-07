@@ -71,6 +71,11 @@
           "type": "boolean",
           "default": false,
           "description": "For Japanese user. Improve Japanese boundary."
+        },
+        "boundaryMove.jumpZoomOut": {
+          "type": "boolean",
+          "default": true,
+          "description": "Zoom out before jump."
         }
       }
     },

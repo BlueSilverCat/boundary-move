@@ -9,8 +9,10 @@ function activate(context) {
   const name = "BoundaryMove";
   const channel = vscode.window.createOutputChannel(`${name}`);
   channel.appendLine(`${name}: activate`);
-  const config = vscode.workspace.getConfiguration("boundaryMove");
+  let config = vscode.workspace.getConfiguration("boundaryMove");
+  let jumpZoomOut = config.get("jumpZoomOut", true);
   const bm = new boundary.BoundaryManager(channel, config);
+
   vscodeUtil.registerCommand(context, "BM.moveLeft", moveLeft);
   vscodeUtil.registerCommand(context, "BM.moveRight", moveRight);
   vscodeUtil.registerCommand(context, "BM.selectLeft", selectLeft);
@@ -22,7 +24,9 @@ function activate(context) {
   vscode.workspace.onDidChangeConfiguration(
     (event) => {
       if (event.affectsConfiguration("boundaryMove") === true) {
-        bm.config(vscode.workspace.getConfiguration("boundaryMove"));
+        config = vscode.workspace.getConfiguration("boundaryMove");
+        bm.config(config);
+        jumpZoomOut = config.get("jumpZoomOut", true);
       }
     },
     null,
@@ -93,14 +97,23 @@ function activate(context) {
       return;
     }
 
+    if (jumpZoomOut === true) {
+      await vscode.commands.executeCommand("editor.action.fontZoomOut");
+    }
     const { documentIndex, start, end } = bm.getVisibleRange(editor);
     if (documentIndex === -1 || end - start <= 0) {
+      if (jumpZoomOut === true) {
+        await vscode.commands.executeCommand("editor.action.fontZoomIn");
+      }
       return;
     }
     const decorationRanges = bm.getDecorationRanges(documentIndex, start, end);
     const decorationTypes = setDecorations(editor, decorationRanges);
     const result = await showBoundaryInputRange(decorationRanges);
     decorationTypes.dispose();
+    if (jumpZoomOut === true) {
+      await vscode.commands.executeCommand("editor.action.fontZoomIn");
+    }
     if (result === null) {
       return;
     }
@@ -119,8 +132,14 @@ function activate(context) {
     if (documentIndex === -1 || lineCount <= 0) {
       return;
     }
+    if (jumpZoomOut === true) {
+      await vscode.commands.executeCommand("editor.action.fontZoomOut");
+    }
     const lineIndex = await showLineInput(lineCount, editor.selection.active.line);
     if (lineIndex === -1) {
+      if (jumpZoomOut === true) {
+        await vscode.commands.executeCommand("editor.action.fontZoomIn");
+      }
       return;
     }
 
@@ -128,6 +147,9 @@ function activate(context) {
     const decorationTypes = setDecorations(editor, [lineDecorationRanges]);
     const count = await showBoundaryInput(lineDecorationRanges);
     decorationTypes.dispose();
+    if (jumpZoomOut === true) {
+      await vscode.commands.executeCommand("editor.action.fontZoomIn");
+    }
     if (count === -1) {
       return;
     }
@@ -214,6 +236,8 @@ function activate(context) {
             before: {
               contentText: option.textContent,
               margin: bm.MarkerMargin,
+              fontStyle: "normal",
+              fontWeight: "normal",
               color: { id: "boundaryMove.markerColor" },
               backgroundColor: { id: "boundaryMove.markerBackgroundColor" },
             },
