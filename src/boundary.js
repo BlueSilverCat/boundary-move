@@ -193,7 +193,7 @@ class DocumentBoundary {
    * @param {{ start: number; end: number; }} lineIndex
    */
   changeLines(document, lineIndex) {
-    for (let i = lineIndex.start; i <= lineIndex.end; ++i) {
+    for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
       this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
     }
   }
@@ -641,7 +641,9 @@ class BoundaryManager {
       lineIndex.end = change.range.end.line;
       diff = event.document.lineCount - this.documentBoundaries[index].lineBoundaries.length;
       this.modify(diff, index, lineIndex.start);
-      lineIndex.end += diff;
+      if (diff > 0) {
+        lineIndex.end += diff;
+      }
       this.documentBoundaries[index].changeLines(event.document, lineIndex);
     }
     statusBar.dispose();
@@ -880,7 +882,7 @@ class BoundaryManager {
     this.channel.show();
   }
 }
-BoundaryManager.Schemes = ["file", "untitled"]; // NG: output
+BoundaryManager.Schemes = ["file", "untitled", "vscode-userdata"]; // NG: output
 BoundaryManager.ScanMessage = "Boundary Move Scanning...";
 BoundaryManager.ScanEndMessage = "Boundary Move Scan End.";
 BoundaryManager.MessageTimeout = 3000;
