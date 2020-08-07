@@ -14,6 +14,7 @@
 ### [Fixed]
 
 - Detect change event
+- revealCursor()
 
 ## [0.0.4] 2020/08/02
 
