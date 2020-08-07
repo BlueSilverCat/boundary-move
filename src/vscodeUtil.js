@@ -247,21 +247,19 @@ async function revealCursor(editor) {
   //need fix
   const line = editor.selection.active.line;
   // const character = editor.selection.active.character;
+  let diff = 0;
   for (let i = 0; i < 1; ++i) {
-    if (line > editor.visibleRanges[i].start.line && line < editor.visibleRanges[i].end.line) {
-      await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
-      continue;
-    }
-
-    let diff = 0;
     diff = editor.visibleRanges[i].start.line - line;
     if (diff > 0 && editor.visibleRanges[i].start.line > 0) {
       await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "top" });
-      continue;
     }
     diff = line - editor.visibleRanges[i].end.line + 1;
     if (diff > 0 && editor.visibleRanges[i].end.line < editor.document.lineCount - 1) {
       await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "bottom" });
+    }
+    // need fix. need horizontal scroll api
+    if (line !== editor.visibleRanges[i].end.line) {
+      await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
     }
   }
 }
