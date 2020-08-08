@@ -637,8 +637,8 @@ class BoundaryManager {
     const lineIndex = { start: 0, end: 0 };
     let diff = 0;
     for (const change of event.contentChanges) {
-      lineIndex.start = change.range.start.line;
-      lineIndex.end = change.range.end.line;
+      lineIndex.start = event.document.positionAt(change.rangeOffset).line;
+      lineIndex.end = event.document.positionAt(change.rangeOffset + change.rangeLength).line;
       diff = event.document.lineCount - this.documentBoundaries[index].lineBoundaries.length;
       this.modify(diff, index, lineIndex.start);
       if (diff > 0) {

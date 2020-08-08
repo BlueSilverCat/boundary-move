@@ -1,8 +1,14 @@
 # Change Log
 
+## [0.1.2] 2020/08/08
+
+- Detect change event
+
+### [Fixed]
+
 ## [0.1.1] 2020/08/07
 
-### [Fix]
+### [Fixed]
 
 - Retry publish
 
