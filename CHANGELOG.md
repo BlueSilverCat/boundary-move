@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.1.1] 2020/08/07
+
+### [Fix]
+
+- Retry publish
+
 ## [0.1.0] 2020/08/07
 
 ### [Added]
@@ -14,6 +20,7 @@
 ### [Fixed]
 
 - Detect change event
+- revealCursor()
 
 ## [0.0.4] 2020/08/02
 
