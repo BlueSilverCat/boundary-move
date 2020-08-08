@@ -4,7 +4,6 @@ class decorator {
     //this.
   }
 }
-
 //prettier-ignore
 export {
   decorator
