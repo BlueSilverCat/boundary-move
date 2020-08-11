@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.2.0] 2020/08/11
+
+### [Added]
+
+- Zoom out level.
+
 ## [0.1.2] 2020/08/08
 
 - Detect change event
