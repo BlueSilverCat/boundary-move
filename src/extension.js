@@ -185,7 +185,7 @@ function activate(context) {
    * @param {{range: import("vscode").Range, textContent: string, index: number}[]} lineDecorationRanges
    */
   async function showBoundaryInput(lineDecorationRanges) {
-    const rangeString = `range: a -- ${vscodeUtil.convertToString(lineDecorationRanges.length - 1)}`;
+    const rangeString = `range: a -- ${bm.converter.convertToString(lineDecorationRanges.length - 1)}`;
     const result = await vscode.window.showInputBox({
       placeHolder: rangeString,
       prompt: `Input boundary index for jump. ${rangeString}`,
@@ -194,7 +194,7 @@ function activate(context) {
     if (vscodeUtil.isEmpty(result) === true) {
       return -1;
     }
-    let i = vscodeUtil.convertToNumber(result);
+    let i = bm.converter.convertToNumber(result);
     let count = 0;
     if (i < 0) {
       count = lineDecorationRanges[0].index;
@@ -207,10 +207,7 @@ function activate(context) {
   }
 
   async function showBoundaryInputRange(decorationRanges) {
-    const rangeString = `range: aa -- ${
-      decorationRanges[decorationRanges.length - 1][decorationRanges[decorationRanges.length - 1].length - 1]
-        .textContent
-    }`;
+    const rangeString = `range: aa -- ${decorationRanges[decorationRanges.length - 1][decorationRanges[decorationRanges.length - 1].length - 1].textContent}`;
     const input = await vscode.window.showInputBox({
       placeHolder: rangeString,
       prompt: `Input boundary index for jump. ${rangeString}`,
@@ -251,7 +248,7 @@ function activate(context) {
 }
 exports.activate = activate;
 
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
   activate,

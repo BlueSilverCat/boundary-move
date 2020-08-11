@@ -520,6 +520,7 @@ class BoundaryManager {
     this.documentBoundaries = [];
     this.channel = channel;
     this.setConfig(config);
+    this.converter = new vscodeUtil.RadixConverter();
   }
 
   /**
@@ -765,7 +766,7 @@ class BoundaryManager {
           lineIndex,
           lineBoundaries[i].start + lineBoundaries[i].length
         ),
-        textContent: lineString + vscodeUtil.convertToString(count),
+        textContent: lineString + this.converter.convertToString(count),
         lineIndex,
         index: i,
       });
@@ -783,7 +784,7 @@ class BoundaryManager {
   getDecorationRanges(documentIndex, start, end) {
     const decorationRanges = [];
     for (let i = 0; i <= end - start; ++i) {
-      decorationRanges.push(this.getLineDecorationRanges(documentIndex, i + start, vscodeUtil.convertToString(i)));
+      decorationRanges.push(this.getLineDecorationRanges(documentIndex, i + start, this.converter.convertToString(i)));
     }
     return decorationRanges;
   }
@@ -816,9 +817,8 @@ class BoundaryManager {
    * @param {string} _type
    * @returns {number[]}
    */
-  static compare(obj, target, index, left, right, _type = "") {
-    const v = vscodeUtil.convertToNumber(obj.textContent);
-    //const n = vscodeUtil.convertToNumber(target);
+  compare(obj, target, index, left, right, _type = "") {
+    const v = this.converter.convertToNumber(obj.textContent);
     return BoundaryManager.compareEq(v, target, index, left, right);
   }
 
@@ -832,15 +832,15 @@ class BoundaryManager {
    * 数値の割り振り方を変える
    */
   search(decorationRanges, textContent) {
-    const target = vscodeUtil.convertToNumber(textContent);
+    const target = this.converter.convertToNumber(textContent);
     let min = 0;
     let max = 0;
     let index = 0;
     for (const lineDecorationRanges of decorationRanges) {
-      min = vscodeUtil.convertToNumber(lineDecorationRanges[0].textContent);
-      max = vscodeUtil.convertToNumber(lineDecorationRanges[lineDecorationRanges.length - 1].textContent);
+      min = this.converter.convertToNumber(lineDecorationRanges[0].textContent);
+      max = this.converter.convertToNumber(lineDecorationRanges[lineDecorationRanges.length - 1].textContent);
       if (target >= min && target <= max) {
-        index = DocumentBoundary.search(lineDecorationRanges, target, "eq", BoundaryManager.compare);
+        index = DocumentBoundary.search(lineDecorationRanges, target, "eq", this.compare.bind(this));
         if (index !== -1) {
           return { lineIndex: lineDecorationRanges[index].lineIndex, count: lineDecorationRanges[index].index };
         }
@@ -879,7 +879,7 @@ BoundaryManager.ScanEndMessage = "Boundary Move Scan End.";
 BoundaryManager.MessageTimeout = 3000;
 BoundaryManager.DefaultCapitalLetter = true;
 BoundaryManager.DefaultJapanese = false;
-BoundaryManager.DefaultSpecialCharactors = "\"'`";
+BoundaryManager.DefaultSpecialCharactors = "\"'`()[]{}";
 BoundaryManager.DefaultMargin = "0ex 0.3ex 0ex 0.7ex";
 
 exports.DocumentBoundary = DocumentBoundary;

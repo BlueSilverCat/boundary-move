@@ -136,6 +136,41 @@ function convertToNumber(str, char = "a", radix = 26) {
   return result;
 }
 
+class RadixConverter {
+  constructor(char = "a", radix = 26) {
+    this.char = char;
+    this.radix = radix
+    this.table = {};
+  }
+
+  /**
+ * @param {number} n
+ * @returns {string}
+ */
+  convertToString(n) {
+    if (this.table.hasOwnProperty(n) === true) {
+      return this.table[n];
+    }
+    const result = convertToString(n, this.char, this.radix);
+    this.table[n] = result;
+    return result;
+  }
+
+  /**
+   * @param {string} str
+   * @returns {number}
+   */
+  convertToNumber(str) {
+    if (this.table.hasOwnProperty(str) === true) {
+      return this.table[str];
+    }
+    const result = convertToNumber(str, this.char, this.radix)
+    this.table[str] = result;
+    return result;
+  }
+
+}
+
 function deleteLine(text, lineIndex, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -560,6 +595,8 @@ exports.sortKey = sortKey;
 exports.uniquePush = uniquePush;
 exports.convertToString = convertToString;
 exports.convertToNumber = convertToNumber;
+exports.RadixConverter = RadixConverter;
+
 exports.deleteLine = deleteLine;
 exports.insertLine = insertLine;
 exports.replaceLine = replaceLine;
