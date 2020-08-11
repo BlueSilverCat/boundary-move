@@ -193,7 +193,9 @@ class DocumentBoundary {
    * @param {{ start: number; end: number; }} lineIndex
    */
   changeLines(document, lineIndex) {
+    console.log(`changeLine: ${document.lineCount}, ${lineIndex.start} -- ${lineIndex.end}`);
     for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
+      console.log(`changeLine: ${i}, ${document.lineAt(i).text}`);
       this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
     }
   }
@@ -632,13 +634,12 @@ class BoundaryManager {
       this.add(event.document);
       return;
     }
-
     let statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanMessage);
     const lineIndex = { start: 0, end: 0 };
     let diff = 0;
     for (const change of event.contentChanges) {
-      lineIndex.start = event.document.positionAt(change.rangeOffset).line;
-      lineIndex.end = event.document.positionAt(change.rangeOffset + change.rangeLength).line;
+      lineIndex.start = change.range.start.line;
+      lineIndex.end = change.range.end.line;
       diff = event.document.lineCount - this.documentBoundaries[index].lineBoundaries.length;
       this.modify(diff, index, lineIndex.start);
       if (diff > 0) {
