@@ -2,6 +2,10 @@
 
 ## [0.2.1] 2020/08/12
 
+### [Changed]
+
+- Improve jump.
+
 ### [Fixed]
 
 - Revert change()
