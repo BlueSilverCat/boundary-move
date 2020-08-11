@@ -465,7 +465,7 @@ class DocumentBoundary {
 // GeneralCategoryのどれにも当てはまらないものは存在するのか?
 // 排他的
 DocumentBoundary.GeneralCategory = [
-  { shortValue: "Cc", longValue: "Control", regex: /\p{Cc}+/gu },
+  { shortValue: "Cc", longValue: "Control", regex: /\p{Cc}+/gu }, // tab
   { shortValue: "Cf", longValue: "Format", regex: /\p{Cf}+/gu },
   { shortValue: "Cn", longValue: "Unassigned", regex: /\p{Cn}+/gu },
   { shortValue: "Co", longValue: "Private_Use", regex: /\p{Co}+/gu },
@@ -487,11 +487,11 @@ DocumentBoundary.GeneralCategory = [
   { shortValue: "No", longValue: "Other_Number", regex: /\p{No}+/gu },
   //{ shortValue: "N", longValue: "Number" , regex: /\p{N}+/ug},
   { shortValue: "Pc", longValue: "Connector_Punctuation", regex: /\p{Pc}+/gu },
-  { shortValue: "Pd", longValue: "Dash_Punctuation", regex: /\p{Pd}+/gu },
+  { shortValue: "Pd", longValue: "Dash_Punctuation", regex: /\p{Pd}+/gu }, // -
   { shortValue: "Pe", longValue: "Close_Punctuation", regex: /\p{Pe}+/gu },
   { shortValue: "Pf", longValue: "Final_Punctuation", regex: /\p{Pf}+/gu },
   { shortValue: "Pi", longValue: "Initial_Punctuation", regex: /\p{Pi}+/gu },
-  { shortValue: "Po", longValue: "Other_Punctuation", regex: /\p{Po}+/gu }, // "'、。も同じ
+  { shortValue: "Po", longValue: "Other_Punctuation", regex: /\p{Po}+/gu }, // :"'、。も同じ
   { shortValue: "Ps", longValue: "Open_Punctuation", regex: /\p{Ps}+/gu },
   //{ shortValue: "P", longValue: "Punctuation" , regex: /\p{P}+/ug},
   { shortValue: "Sc", longValue: "Currency_Symbol", regex: /\p{Sc}+/gu },
