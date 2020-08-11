@@ -10,7 +10,7 @@ function activate(context) {
   const channel = vscode.window.createOutputChannel(`${name}`);
   channel.appendLine(`${name}: activate`);
   let config = vscode.workspace.getConfiguration("boundaryMove");
-  let jumpZoomOut = config.get("jumpZoomOut", true);
+  let jumpZoomOutLevel = config.get("jumpZoomOutLevel", 1);
   const bm = new boundary.BoundaryManager(channel, config);
 
   vscodeUtil.registerCommand(context, "BM.moveLeft", moveLeft);
@@ -26,7 +26,7 @@ function activate(context) {
       if (event.affectsConfiguration("boundaryMove") === true) {
         config = vscode.workspace.getConfiguration("boundaryMove");
         bm.config(config);
-        jumpZoomOut = config.get("jumpZoomOut", true);
+        jumpZoomOutLevel = config.get("jumpZoomOutLevel", 1);
       }
     },
     null,
@@ -97,13 +97,13 @@ function activate(context) {
       return;
     }
 
-    if (jumpZoomOut === true) {
-      await vscode.commands.executeCommand("editor.action.fontZoomOut");
+    if (jumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomOut(jumpZoomOutLevel);
     }
     const { documentIndex, start, end } = bm.getVisibleRange(editor);
     if (documentIndex === -1 || end - start <= 0) {
-      if (jumpZoomOut === true) {
-        await vscode.commands.executeCommand("editor.action.fontZoomIn");
+      if (jumpZoomOutLevel > 0) {
+        await vscodeUtil.fontZoomIn(jumpZoomOutLevel);
       }
       return;
     }
@@ -111,8 +111,8 @@ function activate(context) {
     const decorationTypes = setDecorations(editor, decorationRanges);
     const result = await showBoundaryInputRange(decorationRanges);
     decorationTypes.dispose();
-    if (jumpZoomOut === true) {
-      await vscode.commands.executeCommand("editor.action.fontZoomIn");
+    if (jumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomIn(jumpZoomOutLevel);
     }
     if (result === null) {
       return;
@@ -132,13 +132,13 @@ function activate(context) {
     if (documentIndex === -1 || lineCount <= 0) {
       return;
     }
-    if (jumpZoomOut === true) {
-      await vscode.commands.executeCommand("editor.action.fontZoomOut");
+    if (jumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomOut(jumpZoomOutLevel);
     }
     const lineIndex = await showLineInput(lineCount, editor.selection.active.line);
     if (lineIndex === -1) {
-      if (jumpZoomOut === true) {
-        await vscode.commands.executeCommand("editor.action.fontZoomIn");
+      if (jumpZoomOutLevel > 0) {
+        await vscodeUtil.fontZoomIn(jumpZoomOutLevel);
       }
       return;
     }
@@ -147,8 +147,8 @@ function activate(context) {
     const decorationTypes = setDecorations(editor, [lineDecorationRanges]);
     const count = await showBoundaryInput(lineDecorationRanges);
     decorationTypes.dispose();
-    if (jumpZoomOut === true) {
-      await vscode.commands.executeCommand("editor.action.fontZoomIn");
+    if (jumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomIn(jumpZoomOutLevel);
     }
     if (count === -1) {
       return;

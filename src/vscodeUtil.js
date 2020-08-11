@@ -399,6 +399,27 @@ async function vsReplaceLine(document, lineIndex, string) {
   workspaceEdit.replace(document.uri, new vscode.Range(lineIndex, 0, lineIndex + 1, 0), string + eol);
   await vscode.workspace.applyEdit(workspaceEdit);
 }
+
+/**
+ *
+ * @param {number} level
+ */
+async function fontZoomOut(level) {
+  for (let i = 0; i < level; ++i) {
+    await vscode.commands.executeCommand("editor.action.fontZoomOut");
+  }
+}
+
+/**
+ *
+ * @param {number} level
+ */
+async function fontZoomIn(level) {
+  for (let i = 0; i < level; ++i) {
+    await vscode.commands.executeCommand("editor.action.fontZoomIn");
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // experimental
 ////////////////////////////////////////////////////////////////////////////////
@@ -557,6 +578,10 @@ exports.moveSelections = moveSelections;
 exports.vsDeleteLine = vsDeleteLine;
 exports.vsInsertLine = vsInsertLine;
 exports.vsReplaceLine = vsReplaceLine;
+
+exports.fontZoomOut = fontZoomOut;
+exports.fontZoomIn = fontZoomIn;
+
 // exports.getTextLines = getTextLines;
 // exports.outputToChannel = outputToChannel;
 // exports.getLastActiveEditor = getLastActiveEditor;
