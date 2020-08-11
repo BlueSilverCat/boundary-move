@@ -5,6 +5,6 @@
   "boundary-move.markerMargin": "0ex 0.3ex 0ex 0.7ex",
   "boundaryMove.specialCharacters": "\"'`",
   "boundaryMove.capitalLetter": true,
-  "boundaryMove.japanese": true,
+  "boundaryMove.japanese": false,
   "boundaryMove.markerMargin": "0ex 0.3ex 0ex 0.7ex"
 }

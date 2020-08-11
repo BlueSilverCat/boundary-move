@@ -1036,7 +1036,7 @@ describe("BoundaryManager", function () {
       });
     });
     afterEach(async function () {
-      await vscode.commands.executeCommand("undo");
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
       dispose.dispose();
     });
 
@@ -1064,6 +1064,61 @@ describe("BoundaryManager", function () {
       const expected = Array.from(BOUNDARY_MOVETEST);
       expected[0] = [b("Nd", 0, 3), b("Ll", 3, 3), b("EOL", 6, 0)];
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, expected);
+    });
+
+    it("deleteLine", async function () {
+      this.timeout(0);
+      ({ bm, channel, config, document, editor } = await prepare2("prettierTest01.js"));
+      bm.add(document);
+      assert.strictEqual(bm.documentBoundaries.length, 1);
+      assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, [
+        [b("Po", 0, 2), b("Zs", 2, 1), b("Ll", 3, 8), b("Pd", 11, 1), b("Ll", 12, 6), b("EOL", 18, 0)],
+        [b("Ps", 0, 1), b("EOL", 1, 0)],
+        [b("Cc", 0, 1), b("Ll", 1, 8), b("CCL", 9, 7), b("Po", 16, 1), b("Zs", 17, 1), b("Ps", 18, 1), b("EOL", 19, 0)],
+        [
+          b("Cc", 0, 2),
+          b("Ll", 2, 6),
+          b("Po", 8, 1),
+          b("Zs", 9, 1),
+          b("SPC", 10, 1),
+          b("Ll", 11, 8),
+          b("SPC", 19, 1),
+          b("Pe", 20, 1),
+          b("EOL", 21, 0),
+        ],
+        [b("Pe", 0, 1), b("EOL", 1, 0)],
+        [b("EOL", 0, 0)],
+      ]);
+      await vscodeUtil.vsDeleteLine(document, 0);
+      await vscode.commands.executeCommand("editor.action.formatDocument");
+
+      assert.strictEqual(bm.documentBoundaries.length, 1);
+      assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, [
+        [b("Ps", 0, 1), b("EOL", 1, 0)],
+        [
+          b("Zs", 0, 2),
+          b("Ll", 2, 8),
+          b("CCL", 10, 7),
+          b("Po", 17, 1),
+          b("Zs", 18, 1),
+          b("Ps", 19, 1),
+          b("EOL", 20, 0),
+        ],
+        [
+          b("Zs", 0, 4),
+          b("Ll", 4, 6),
+          b("Po", 10, 1),
+          b("Zs", 11, 1),
+          b("SPC", 12, 1),
+          b("Ll", 13, 8),
+          b("SPC", 21, 1),
+          b("EOL", 22, 0),
+        ],
+        [b("Zs", 0, 2), b("Pe", 2, 1), b("EOL", 3, 0)],
+        [b("Pe", 0, 1), b("EOL", 1, 0)],
+        [b("EOL", 0, 0)],
+      ]);
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     });
   });
 
