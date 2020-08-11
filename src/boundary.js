@@ -193,9 +193,7 @@ class DocumentBoundary {
    * @param {{ start: number; end: number; }} lineIndex
    */
   changeLines(document, lineIndex) {
-    console.log(`changeLine: ${document.lineCount}, ${lineIndex.start} -- ${lineIndex.end}`);
     for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
-      console.log(`changeLine: ${i}, ${document.lineAt(i).text}`);
       this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
     }
   }
@@ -850,15 +848,6 @@ class BoundaryManager {
     }
     return null;
   }
-
-  // uris() {
-  //   const result = [];
-  //   for (const cb of this.characterBoundaries) {
-  //     result.push(cb.uri);
-  //   }
-  //   console.log(result);
-  //   return result;
-  // }
 
   info() {
     this.channel.appendLine(`Documents: ${this.documentBoundaries.length}`);
