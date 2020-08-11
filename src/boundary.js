@@ -634,6 +634,7 @@ class BoundaryManager {
       this.add(event.document);
       return;
     }
+
     let statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanMessage);
     const lineIndex = { start: 0, end: 0 };
     let diff = 0;
