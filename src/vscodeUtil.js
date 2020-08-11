@@ -514,39 +514,39 @@ async function fontZoomIn(level) {
 //   return result;
 // }
 
-// function getTextDocumentChangeEventInfo(event, separator = "\n") {
-//   let result = "";
-//   for (const contentChange of event.contentChanges) {
-//     result += `range: \n${getRangeInfo(contentChange.range)}${separator}`;
-//     result += `rangeLength: ${contentChange.rangeLength}${separator}`;
-//     result += `rangeOffset: ${contentChange.rangeOffset}${separator}`;
-//     result += `psitionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
-//     result += `psitionAt: ${getPositionInfo(
-//       event.document.positionAt(contentChange.rangeOffset + contentChange.rangeLength),
-//       ", "
-//     )}${separator}`;
-//     result += `text: ${contentChange.text}${separator}`;
-//   }
-//   const re = new RegExp(`${separator}$`);
-//   result = result.replace(re, "");
-//   return result;
-// }
+function getTextDocumentChangeEventInfo(event, separator = "\n") {
+  let result = "";
+  for (const contentChange of event.contentChanges) {
+    result += `range: \n${getRangeInfo(contentChange.range)}${separator}`;
+    result += `rangeLength: ${contentChange.rangeLength}${separator}`;
+    result += `rangeOffset: ${contentChange.rangeOffset}${separator}`;
+    result += `psitionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
+    result += `psitionAt: ${getPositionInfo(
+      event.document.positionAt(contentChange.rangeOffset + contentChange.rangeLength),
+      ", "
+    )}${separator}`;
+    result += `text: ${contentChange.text}${separator}`;
+  }
+  const re = new RegExp(`${separator}$`);
+  result = result.replace(re, "");
+  return result;
+}
 
-// function getRangeInfo(range, separator = "\n") {
-//   let result = "";
-//   result += `start: ${getPositionInfo(range.start, ", ")}${separator}`;
-//   result += `end: ${getPositionInfo(range.end, ", ")}${separator}`;
-//   result += `isEmpty: ${range.isEmpty}${separator}`;
-//   result += `isSingleLine: ${range.isSingleLine}`;
-//   return result;
-// }
+function getRangeInfo(range, separator = "\n") {
+  let result = "";
+  result += `start: ${getPositionInfo(range.start, ", ")}${separator}`;
+  result += `end: ${getPositionInfo(range.end, ", ")}${separator}`;
+  result += `isEmpty: ${range.isEmpty}${separator}`;
+  result += `isSingleLine: ${range.isSingleLine}`;
+  return result;
+}
 
-// function getPositionInfo(position, separator = "\n") {
-//   let result = "";
-//   result += `line: ${position.line}${separator}`;
-//   result += `character: ${position.character}`;
-//   return result;
-// }
+function getPositionInfo(position, separator = "\n") {
+  let result = "";
+  result += `line: ${position.line}${separator}`;
+  result += `character: ${position.character}`;
+  return result;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // exports
@@ -587,4 +587,4 @@ exports.fontZoomIn = fontZoomIn;
 // exports.getLastActiveEditor = getLastActiveEditor;
 // exports.getEditorInfo = getEditorInfo;
 // exports.getRangeInfo = getRangeInfo;
-// exports.getTextDocumentChangeEventInfo = getTextDocumentChangeEventInfo;
+exports.getTextDocumentChangeEventInfo = getTextDocumentChangeEventInfo;
