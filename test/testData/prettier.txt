@@ -1,0 +1,13 @@
+function func1() {
+  return "";
+}
+vscode.workspace.onDidChangeTextDocument(
+    (event) => {
+      if (dm.autoDecorate === false) {
+        return;
+      }
+      dm.change(event);
+    },
+    null,
+    context.subscriptions
+  );
