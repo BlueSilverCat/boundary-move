@@ -13,7 +13,8 @@
       "args": [
         "${workspaceFolder}/test/testData",
         "${workspaceFolder}/test/testData/defaultOpen.txt",
-        "--extensionDevelopmentPath=${workspaceFolder}"
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--disable-extensions"
       ],
       "sourceMaps": true
     },
@@ -26,7 +27,8 @@
         "${workspaceFolder}/test/testData",
         "${workspaceFolder}/test/testData/defaultOpen.txt",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/test/suite/index"
+        "--extensionTestsPath=${workspaceFolder}/test/suite/index",
+        "--disable-extensions"
       ],
       "sourceMaps": true
     }
