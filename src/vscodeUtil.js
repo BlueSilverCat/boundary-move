@@ -140,7 +140,8 @@ class RadixConverter {
   constructor(char = "a", radix = 26) {
     this.char = char;
     this.radix = radix
-    this.table = {};
+    this.NtStable = {};
+    this.StNtable = {};
   }
 
   /**
@@ -148,11 +149,11 @@ class RadixConverter {
  * @returns {string}
  */
   convertToString(n) {
-    if (this.table.hasOwnProperty(n) === true) {
-      return this.table[n];
+    if (this.NtStable.hasOwnProperty(n) === true) {
+      return this.NtStable[n];
     }
     const result = convertToString(n, this.char, this.radix);
-    this.table[n] = result;
+    this.NtStable[n] = result;
     return result;
   }
 
@@ -161,14 +162,13 @@ class RadixConverter {
    * @returns {number}
    */
   convertToNumber(str) {
-    if (this.table.hasOwnProperty(str) === true) {
-      return this.table[str];
+    if (this.StNtable.hasOwnProperty(str) === true) {
+      return this.StNtable[str];
     }
     const result = convertToNumber(str, this.char, this.radix)
-    this.table[str] = result;
+    this.StNtable[str] = result;
     return result;
   }
-
 }
 
 function deleteLine(text, lineIndex, eol = "\n") {

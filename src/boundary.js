@@ -521,6 +521,7 @@ class BoundaryManager {
     this.channel = channel;
     this.setConfig(config);
     this.converter = new vscodeUtil.RadixConverter();
+    this.compare = this._compare.bind(this);
   }
 
   /**
@@ -817,7 +818,7 @@ class BoundaryManager {
    * @param {string} _type
    * @returns {number[]}
    */
-  compare(obj, target, index, left, right, _type = "") {
+  _compare(obj, target, index, left, right, _type = "") {
     const v = this.converter.convertToNumber(obj.textContent);
     return BoundaryManager.compareEq(v, target, index, left, right);
   }
@@ -840,7 +841,7 @@ class BoundaryManager {
       min = this.converter.convertToNumber(lineDecorationRanges[0].textContent);
       max = this.converter.convertToNumber(lineDecorationRanges[lineDecorationRanges.length - 1].textContent);
       if (target >= min && target <= max) {
-        index = DocumentBoundary.search(lineDecorationRanges, target, "eq", this.compare.bind(this));
+        index = DocumentBoundary.search(lineDecorationRanges, target, "eq", this.compare);
         if (index !== -1) {
           return { lineIndex: lineDecorationRanges[index].lineIndex, count: lineDecorationRanges[index].index };
         }
