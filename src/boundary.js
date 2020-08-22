@@ -16,7 +16,7 @@ class DocumentBoundary {
    * @param {string} shortValue
    * @param {number} start
    * @param {number} length
-   * @returns {{ shortValue: string, start: number, length: number; }}
+   * @returns {{ shortValue: string, start: number, length: number }}
    */
   static getBoundary(shortValue, start, length) {
     return {
@@ -73,6 +73,7 @@ class DocumentBoundary {
   /**
    * @param {string} string
    * @param {{ shortValue: string, longValue: string, regex: RegExp }[]} regexes
+   * @param {number} start
    * @returns {{ shortValue: string, start: number, length: number }[]}
    */
   static scan(string, regexes, start = 0, japanese = false) {
@@ -96,19 +97,20 @@ class DocumentBoundary {
   /**
    * @param {string} line
    * @param {{shortValue: string, start: number, length: number}[]} boundaries
+   * @param {number} initial
    * @returns {{ start: number, string: string }[]}
    */
-  static getRestStrings(line, boundaries) {
+  static getRestStrings(line, boundaries, initial = 0) {
     let stringInfos = [];
     let start = 0;
-    let string = line.substring(0, boundaries[0].start);
+    let string = line.substring(0, boundaries[0].start - initial);
     if (string.length > 0) {
       stringInfos.push({ start, string });
     }
     for (let i = 0; i < boundaries.length; ++i) {
-      start = boundaries[i].start + boundaries[i].length;
+      start = boundaries[i].start - initial + boundaries[i].length;
       if (i !== boundaries.length - 1) {
-        string = line.substring(start, boundaries[i + 1].start);
+        string = line.substring(start, boundaries[i + 1].start - initial);
       } else {
         string = line.substring(start);
       }
@@ -122,19 +124,20 @@ class DocumentBoundary {
   /**
    * @param {string} line
    * @param {{ shortValue: string, longValue: string, regex: RegExp }} SpecialRegex
+   * @param {number} start
    * @returns {{boundaries: {shortValue: string, start: number, length: number}[],
    *    stringInfos:{ start: number, string: string }[]}}
    */
-  static scanSpecialCharacter(line, SpecialRegex) {
+  static scanSpecialCharacter(line, SpecialRegex, start = 0) {
     const ret = { boundaries: [], stringInfos: [{ start: 0, string: line }] };
     if (SpecialRegex === null) {
       return ret;
     }
-    const boundaries = DocumentBoundary.scan(line, [SpecialRegex]);
+    const boundaries = DocumentBoundary.scan(line, [SpecialRegex], start);
     if (boundaries.length === 0) {
       return ret;
     }
-    return { boundaries, stringInfos: DocumentBoundary.getRestStrings(line, boundaries) };
+    return { boundaries, stringInfos: DocumentBoundary.getRestStrings(line, boundaries, start) };
   }
 
   /**
@@ -159,17 +162,25 @@ class DocumentBoundary {
 
   /**
    * @param {string} line
+   * @param {number} start
    * @returns {{shortValue:string, start:number, length:number}[]}
    */
-  scanLine(line) {
-    let { boundaries, stringInfos } = DocumentBoundary.scanSpecialCharacter(line, this.SpecialRegex);
+  scanLine(line, start = 0, eol = true) {
+    let { boundaries, stringInfos } = DocumentBoundary.scanSpecialCharacter(line, this.SpecialRegex, start);
     for (const stringInfo of stringInfos) {
       boundaries.push(
-        ...DocumentBoundary.scan(stringInfo.string, DocumentBoundary.GeneralCategory, stringInfo.start, this.Japanese)
+        ...DocumentBoundary.scan(
+          stringInfo.string,
+          DocumentBoundary.GeneralCategory,
+          start + stringInfo.start,
+          this.Japanese
+        )
       );
     }
     boundaries.sort(DocumentBoundary.sorter);
-    boundaries.push(DocumentBoundary.getBoundary("EOL", line.length, 0));
+    if (eol) {
+      boundaries.push(DocumentBoundary.getBoundary("EOL", start + line.length, 1));
+    }
     if (this.CapitalLetter === true) {
       boundaries = DocumentBoundary.capitalLetter(boundaries);
     }
@@ -188,29 +199,15 @@ class DocumentBoundary {
     return result;
   }
 
-  /**
-   * @param {vscode.TextDocument} document
-   * @param {{ start: number; end: number; }} lineIndex
-   */
-  changeLines(document, lineIndex) {
-    console.log(`changeLine: ${document.lineCount}, ${lineIndex.start} -- ${lineIndex.end}`);
-    for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
-      console.log(`changeLine: ${i}, ${document.lineAt(i).text}`);
-      this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
-    }
-  }
-
-  /**
-   * @param {number} diff
-   * @param {number} lineIndex
-   */
-  modify(diff, lineIndex) {
-    if (diff > 0) {
-      this.lineBoundaries.splice(lineIndex, 0, ...new Array(diff));
-    } else if (diff < 0) {
-      this.lineBoundaries.splice(lineIndex, diff * -1);
-    }
-  }
+  // /**
+  //  * @param {vscode.TextDocument} document
+  //  * @param {{ start: number; end: number; }} lineIndex
+  //  */
+  // changeLines(document, lineIndex) {
+  //   for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
+  //     this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
+  //   }
+  // }
 
   /**
    * @param {vscode.TextEditor} editor
@@ -460,6 +457,175 @@ class DocumentBoundary {
   isSameUri(uri) {
     return uri.path === this.uri.path ? true : false;
   }
+
+  /**
+   *
+   * @param {number} lineIndex
+   * @returns {number}
+   */
+  getLineLength(lineIndex) {
+    const eolBoundary = this.lineBoundaries[lineIndex][this.lineBoundaries[lineIndex].length - 1];
+    return eolBoundary.start + eolBoundary.length;
+  }
+
+  /**
+   *
+   * @param {number} lineIndex
+   * @param {number} start 文字数
+   * @param {number} end 文字数
+   * @return {{shortValue:string, start:number, length:number}[]}
+   */
+  sliceLine(lineIndex, start, end = null) {
+    const len = this.getLineLength(lineIndex);
+    if (end === null || end > len) {
+      end = len;
+    }
+
+    const result = [];
+    for (const boundary of this.lineBoundaries[lineIndex]) {
+      if (boundary.start + boundary.length <= start) {
+        continue;
+      }
+      if (boundary.start >= end) {
+        break;
+      }
+
+      const work = Object.assign({}, boundary);
+      if (work.start < start) {
+        work.length -= start - work.start;
+        work.start = start;
+      }
+      if (work.start + work.length > end) {
+        work.length = end - work.start;
+      }
+      if (work.shortValue === "CCL") {
+        if (work.start === boundary.start && work.length === 1) {
+          work.shortValue = "Lu";
+        } else if (work.start > boundary.start) {
+          work.shortValue = "Ll";
+        }
+      }
+      result.push(work);
+    }
+    return result;
+  }
+
+  /**
+   *
+   * @param {number} startRow
+   * @param {number} startColumn 文字数
+   * @param {number} endRow
+   * @param {number} endColumn 文字数
+   * @return {{shortValue:string, start:number, length:number}[][]}
+   */
+  slice(startRow, startColumn, endRow = null, endColumn = null) {
+    if (endRow === null || endRow >= this.lineBoundaries.length) {
+      endRow = this.lineBoundaries.length - 1;
+    }
+
+    const result = [];
+    let start = 0;
+    let end = 0;
+    for (let row = startRow; row <= endRow; ++row) {
+      const len = this.getLineLength(row);
+      if (row === startRow) {
+        start = startColumn;
+        end = len;
+        if (startRow === endRow) {
+          end = endColumn !== null ? endColumn : len;
+        }
+      } else if (row === endRow) {
+        start = 0;
+        end = endColumn !== null ? endColumn : len;
+      } else {
+        start = 0;
+        end = len;
+      }
+      if (start !== end) {
+        result.push(this.sliceLine(row, start, end));
+      }
+    }
+    return result;
+  }
+
+  /**
+   *
+   * @param {{shortValue:string, start:number, length:number}[]} lineBoundaries "EOL" は無いものとする
+   * @param {{shortValue:string, start:number, length:number}[]} data
+   * @param {boolean} capitalLetter
+   */
+  static concatLine(lineBoundaries, data, capitalLetter) {
+    if (data.length === 0) {
+      return lineBoundaries;
+    }
+    let result = lineBoundaries;
+    let tail = null;
+    if (result.length !== 0) {
+      tail = result[result.length - 1];
+      if (tail.shortValue === data[0].shortValue || (tail.shortValue === "CCL" && data[0].shortValue === "Ll")) {
+        tail.length += data[0].length;
+        data.shift();
+      } else if (capitalLetter === true && tail.shortValue === "Lu" && data[0].shortValue === "Ll") {
+        tail.shortValue = "CCL";
+        tail.length += data[0].length;
+        data.shift();
+      } else if (tail.shortValue === "Lu" && data[0].shortValue === "CCL") {
+        tail.length += 1;
+        data[0] = DocumentBoundary.getBoundary("Ll", data[0].start + 1, data[0].length - 1);
+      }
+    }
+
+    for (const boundary of data) {
+      const work = Object.assign({}, boundary);
+      tail = result.length !== 0 ? result[result.length - 1] : { start: 0, length: 0 };
+      work.start = tail.start + tail.length;
+      result.push(work);
+    }
+    return result;
+  }
+
+  /**
+   *
+   * @param {{shortValue:string, start:number, length:number}[]} lineBoundaries
+   */
+  static check(lineBoundaries) {
+    const result = [];
+    for (let i = 0; i < lineBoundaries.length; ++i) {
+      const work = Object.assign({}, lineBoundaries[i]);
+      if (i !== 0) {
+        work.start = result[i - 1].start + result[i - 1].length;
+      } else {
+        work.start = 0;
+      }
+      result.push(work);
+    }
+    return result;
+  }
+
+  /**
+   * @param {{shortValue:string, start:number, length:number}[][]} boundaries1
+   * @param {{shortValue:string, start:number, length:number}[][]} boundaries2
+   * @param {boolean} capitalLetter
+   */
+  static concat(boundaries1, boundaries2, capitalLetter) {
+    let result = boundaries1;
+    if (boundaries1.length !== 0) {
+      const tail = boundaries1[boundaries1.length - 1][boundaries1[boundaries1.length - 1].length - 1];
+      if (tail.shortValue !== "EOL") {
+        result[result.length - 1] = DocumentBoundary.concatLine(
+          boundaries1[boundaries1.length - 1],
+          vscodeUtil.limitShift(boundaries2),
+          capitalLetter
+        );
+      }
+    }
+    if (boundaries2.length === 0) {
+      return result;
+    }
+    boundaries2[0] = DocumentBoundary.check(boundaries2[0]);
+    result = vscodeUtil.concat2d(result, boundaries2);
+    return result;
+  }
 }
 
 // GeneralCategoryのどれにも当てはまらないものは存在するのか?
@@ -470,8 +636,8 @@ DocumentBoundary.GeneralCategory = [
   { shortValue: "Cn", longValue: "Unassigned", regex: /\p{Cn}+/gu },
   { shortValue: "Co", longValue: "Private_Use", regex: /\p{Co}+/gu },
   { shortValue: "Cs", longValue: "Surrogate", regex: /\p{Cs}+/gu },
-  //{ shortValue: "C", longValue: "Other" , regex: /\p{C}+/ug},
-  //{ shortValue: "LC", longValue: "Cased_Letter" , regex: /\p{LC}+/ug},
+  // { shortValue: "C", longValue: "Other" , regex: /\p{C}+/ug},
+  // { shortValue: "LC", longValue: "Cased_Letter" , regex: /\p{LC}+/ug},
   { shortValue: "Ll", longValue: "Lowercase_Letter", regex: /\p{Ll}+/gu },
   { shortValue: "Lm", longValue: "Modifier_Letter", regex: /\p{Lm}+/gu },
   { shortValue: "Lo", longValue: "Other_Letter", regex: /\p{Lo}+/gu }, //漢字片仮名平仮名は全てLo
@@ -481,11 +647,11 @@ DocumentBoundary.GeneralCategory = [
   { shortValue: "Mc", longValue: "Spacing_Mark", regex: /\p{Mc}+/gu },
   { shortValue: "Me", longValue: "Enclosing_Mark", regex: /\p{Me}+/gu },
   { shortValue: "Mn", longValue: "Nonspacing_Mark", regex: /\p{Mn}+/gu },
-  //{ shortValue: "M", longValue: "Mark" , regex: /\p{M}+/ug},
+  // { shortValue: "M", longValue: "Mark" , regex: /\p{M}+/ug},
   { shortValue: "Nd", longValue: "Decimal_Number", regex: /\p{Nd}+/gu },
   { shortValue: "Nl", longValue: "Letter_Number", regex: /\p{Nl}+/gu },
   { shortValue: "No", longValue: "Other_Number", regex: /\p{No}+/gu },
-  //{ shortValue: "N", longValue: "Number" , regex: /\p{N}+/ug},
+  // { shortValue: "N", longValue: "Number" , regex: /\p{N}+/ug},
   { shortValue: "Pc", longValue: "Connector_Punctuation", regex: /\p{Pc}+/gu },
   { shortValue: "Pd", longValue: "Dash_Punctuation", regex: /\p{Pd}+/gu }, // -
   { shortValue: "Pe", longValue: "Close_Punctuation", regex: /\p{Pe}+/gu },
@@ -498,11 +664,11 @@ DocumentBoundary.GeneralCategory = [
   { shortValue: "Sk", longValue: "Modifier_Symbol", regex: /\p{Sk}+/gu },
   { shortValue: "Sm", longValue: "Math_Symbol", regex: /\p{Sm}+/gu },
   { shortValue: "So", longValue: "Other_Symbol", regex: /\p{So}+/gu },
-  //{ shortValue: "S", longValue: "Symbol" , regex: /\p{S}+/ug},
+  // { shortValue: "S", longValue: "Symbol" , regex: /\p{S}+/ug},
   { shortValue: "Zl", longValue: "Line_Separator", regex: /\p{Zl}+/gu },
   { shortValue: "Zp", longValue: "Paragraph_Separator", regex: /\p{Zp}+/gu },
   { shortValue: "Zs", longValue: "Space_Separator", regex: /\p{Zs}+/gu },
-  //{ shortValue: "Z", longValue: "Separator" , regex: /\p{Z}+/ug},
+  // { shortValue: "Z", longValue: "Separator" , regex: /\p{Z}+/ug},
 ];
 // 排他的
 DocumentBoundary.ScriptJapanese = [
@@ -522,6 +688,8 @@ class BoundaryManager {
     this.documentBoundaries = [];
     this.channel = channel;
     this.setConfig(config);
+    this.converter = new vscodeUtil.RadixConverter();
+    this.compare = this._compare.bind(this);
   }
 
   /**
@@ -610,43 +778,74 @@ class BoundaryManager {
   }
 
   /**
-   * @param {number} diff
-   * @param {number} documentIndex
-   * @param {number} lineIndex
+   *
+   * @param {string} text
+   * @param {string} eol
+   * @returns {{ shortValue: string, start: number, length: number }[][]}
    */
-  modify(diff, documentIndex, lineIndex) {
-    if (diff !== 0) {
-      this.documentBoundaries[documentIndex].modify(diff, lineIndex);
+  getChange(documentIndex, text, eol, start) {
+    const lines = text.split(eol);
+    const result = [];
+    let eolFlag = false;
+    let s = start;
+    for (let i = 0; i < lines.length; ++i) {
+      if (i !== lines.length - 1) {
+        eolFlag = true;
+      } else {
+        eolFlag = false;
+      }
+      vscodeUtil.pushNoEmpty(result, this.documentBoundaries[documentIndex].scanLine(lines[i], s, eolFlag)); // 空配列の扱い
+      s = 0;
     }
+    return result;
   }
 
   /**
-   * @param {vscode.TextDocumentChangeEvent} event
+   *
+   * @param {DocumentBoundary} documentBoundaries
+   * @param {number} startRow
+   * @param {number} startColumn
+   * @param {number} endRow
+   * @param {number} endColumn
+   * @param {{ shortValue: string, start: number, length: number }[][]} data
+   * @returns {{ shortValue: string, start: number, length: number }[][]}
+   */
+  replace(documentBoundaries, startRow, startColumn, endRow, endColumn, data) {
+    let result = documentBoundaries.slice(0, 0, startRow, startColumn);
+    let tail = documentBoundaries.slice(endRow, endColumn);
+    result = DocumentBoundary.concat(result, data, this.CapitalLetter);
+    result = DocumentBoundary.concat(result, tail, this.CapitalLetter);
+    return result;
+  }
+
+  /**
    * もう少し効率よくしたい
+   * @param {vscode.TextDocumentChangeEvent} event
    */
   change(event) {
     if (BoundaryManager.checkScheme(event.document.uri.scheme) === false || event.contentChanges.length === 0) {
       return;
     }
 
-    const index = this.find(event.document.uri);
-    if (index === -1) {
+    const documentIndex = this.find(event.document.uri);
+    if (documentIndex === -1) {
       this.add(event.document);
       return;
     }
 
+    // console.log(vscodeUtil.getTextDocumentChangeEventInfo(event));
     let statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanMessage);
-    const lineIndex = { start: 0, end: 0 };
-    let diff = 0;
     for (const change of event.contentChanges) {
-      lineIndex.start = change.range.start.line;
-      lineIndex.end = change.range.end.line;
-      diff = event.document.lineCount - this.documentBoundaries[index].lineBoundaries.length;
-      this.modify(diff, index, lineIndex.start);
-      if (diff > 0) {
-        lineIndex.end += diff;
-      }
-      this.documentBoundaries[index].changeLines(event.document, lineIndex);
+      const eol = vscodeUtil.getEol(event.document.eol);
+      const data = this.getChange(documentIndex, change.text, eol, change.range.start.character);
+      this.documentBoundaries[documentIndex].lineBoundaries = this.replace(
+        this.documentBoundaries[documentIndex],
+        change.range.start.line,
+        change.range.start.character,
+        change.range.end.line,
+        change.range.end.character,
+        data
+      );
     }
     statusBar.dispose();
     statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanEndMessage, BoundaryManager.MessageTimeout);
@@ -767,7 +966,7 @@ class BoundaryManager {
           lineIndex,
           lineBoundaries[i].start + lineBoundaries[i].length
         ),
-        textContent: lineString + vscodeUtil.convertToString(count),
+        textContent: lineString + this.converter.convertToString(count),
         lineIndex,
         index: i,
       });
@@ -785,7 +984,7 @@ class BoundaryManager {
   getDecorationRanges(documentIndex, start, end) {
     const decorationRanges = [];
     for (let i = 0; i <= end - start; ++i) {
-      decorationRanges.push(this.getLineDecorationRanges(documentIndex, i + start, vscodeUtil.convertToString(i)));
+      decorationRanges.push(this.getLineDecorationRanges(documentIndex, i + start, this.converter.convertToString(i)));
     }
     return decorationRanges;
   }
@@ -818,9 +1017,8 @@ class BoundaryManager {
    * @param {string} _type
    * @returns {number[]}
    */
-  static compare(obj, target, index, left, right, _type = "") {
-    const v = vscodeUtil.convertToNumber(obj.textContent);
-    //const n = vscodeUtil.convertToNumber(target);
+  _compare(obj, target, index, left, right, _type = "") {
+    const v = this.converter.convertToNumber(obj.textContent);
     return BoundaryManager.compareEq(v, target, index, left, right);
   }
 
@@ -834,15 +1032,15 @@ class BoundaryManager {
    * 数値の割り振り方を変える
    */
   search(decorationRanges, textContent) {
-    const target = vscodeUtil.convertToNumber(textContent);
+    const target = this.converter.convertToNumber(textContent);
     let min = 0;
     let max = 0;
     let index = 0;
     for (const lineDecorationRanges of decorationRanges) {
-      min = vscodeUtil.convertToNumber(lineDecorationRanges[0].textContent);
-      max = vscodeUtil.convertToNumber(lineDecorationRanges[lineDecorationRanges.length - 1].textContent);
+      min = this.converter.convertToNumber(lineDecorationRanges[0].textContent);
+      max = this.converter.convertToNumber(lineDecorationRanges[lineDecorationRanges.length - 1].textContent);
       if (target >= min && target <= max) {
-        index = DocumentBoundary.search(lineDecorationRanges, target, "eq", BoundaryManager.compare);
+        index = DocumentBoundary.search(lineDecorationRanges, target, "eq", this.compare);
         if (index !== -1) {
           return { lineIndex: lineDecorationRanges[index].lineIndex, count: lineDecorationRanges[index].index };
         }
@@ -850,15 +1048,6 @@ class BoundaryManager {
     }
     return null;
   }
-
-  // uris() {
-  //   const result = [];
-  //   for (const cb of this.characterBoundaries) {
-  //     result.push(cb.uri);
-  //   }
-  //   console.log(result);
-  //   return result;
-  // }
 
   info() {
     this.channel.appendLine(`Documents: ${this.documentBoundaries.length}`);
@@ -890,7 +1079,7 @@ BoundaryManager.ScanEndMessage = "Boundary Move Scan End.";
 BoundaryManager.MessageTimeout = 3000;
 BoundaryManager.DefaultCapitalLetter = true;
 BoundaryManager.DefaultJapanese = false;
-BoundaryManager.DefaultSpecialCharactors = "\"'`";
+BoundaryManager.DefaultSpecialCharactors = "\"'`()[]{}";
 BoundaryManager.DefaultMargin = "0ex 0.3ex 0ex 0.7ex";
 
 exports.DocumentBoundary = DocumentBoundary;

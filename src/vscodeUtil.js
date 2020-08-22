@@ -79,6 +79,18 @@ function uniquePush(array, data) {
 }
 
 /**
+ * @param {array} array
+ * @param {*} data
+ * @return {array}
+ */
+function pushNoEmpty(array, data) {
+  if (isEmpty(data) === false) {
+    array.push(data);
+  }
+  return array;
+}
+
+/**
  * @param {object} obj
  * @param {string} eol
  * @returns {string}
@@ -136,6 +148,48 @@ function convertToNumber(str, char = "a", radix = 26) {
   return result;
 }
 
+class RadixConverter {
+  constructor(char = "a", radix = 26) {
+    this.char = char;
+    this.radix = radix;
+    this.NtStable = {};
+    this.StNtable = {};
+  }
+
+  /**
+   * @param {number} n
+   * @returns {string}
+   */
+  convertToString(n) {
+    if (this.NtStable.hasOwnProperty(n) === true) {
+      return this.NtStable[n];
+    }
+    const result = convertToString(n, this.char, this.radix);
+    this.NtStable[n] = result;
+    return result;
+  }
+
+  /**
+   * @param {string} str
+   * @returns {number}
+   */
+  convertToNumber(str) {
+    if (this.StNtable.hasOwnProperty(str) === true) {
+      return this.StNtable[str];
+    }
+    const result = convertToNumber(str, this.char, this.radix);
+    this.StNtable[str] = result;
+    return result;
+  }
+}
+
+/**
+ *
+ * @param {string} text
+ * @param {number} lineIndex
+ * @param {string} eol
+ * @return {string}
+ */
 function deleteLine(text, lineIndex, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -145,6 +199,13 @@ function deleteLine(text, lineIndex, eol = "\n") {
   return array.join(eol);
 }
 
+/**
+ *
+ * @param {string} text
+ * @param {number} lineIndex
+ * @param {string} eol
+ * @return {string}
+ */
 function insertLine(text, lineIndex, string, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -155,6 +216,14 @@ function insertLine(text, lineIndex, string, eol = "\n") {
   return array.join(eol);
 }
 
+/**
+ *
+ * @param {string} text
+ * @param {number} lineIndex
+ * @param {string} string
+ * @param {string} eol
+ * @return {string}
+ */
 function replaceLine(text, lineIndex, string, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -173,6 +242,179 @@ function isValidMargin(margin) {
   return re.test(margin);
 }
 
+/**
+ * text内のstringの出現回数を返す。
+ * @param {string} text
+ * @param {string} string
+ */
+function countString(text, string) {
+  const re = new RegExp(string, "g");
+  const result = text.match(re);
+  if (result === null) {
+    return 0;
+  }
+  return result.length;
+}
+
+/**
+ * array の start から end までを data で置き換えた配列を返す
+ * @param{any[]} array
+ * @param{number} start
+ * @param{number} end
+ * @param{any[]} data
+ * @param{boolean} insert
+ */
+function arrayReplace(array, start, end, data, insert = false) {
+  const head = array.slice(0, start);
+  let tailIndex = end;
+  if (insert === false) {
+    tailIndex++;
+  }
+  const tail = array.slice(tailIndex);
+  return head.concat(data.concat(tail));
+}
+
+/*
+ * array を pop する。ただし、空の場合は、valueを返す
+ * @param{any[]} array
+ * @param{any} value
+ */
+function limitPop(array, value = []) {
+  if (array.length === 0) {
+    return value;
+  }
+  return array.pop();
+}
+
+/*
+ * array を shift する。ただし、空の場合は、valueを返す
+ * @param{any[]} array
+ * @param{any} value
+ */
+function limitShift(array, value = []) {
+  if (array.length === 0) {
+    return value;
+  }
+  return array.shift();
+}
+
+/**
+ * array の startRow, startColumn から endRow, endRow までを data で置き換えた配列を返す
+ * @param{any[]} array
+ * @param{number} startRow
+ * @param{number} startColumn
+ * @param{number} endRow
+ * @param{number} endColumn
+ * @param{any[]} data
+ * @param{boolean} insert
+ */
+function arrayReplace2d(array, startRow, startColumn, endRow, endColumn, data, insert = false) {
+  const result = [];
+  data.reverse();
+  let start = 0;
+  let end = 0;
+  for (let row = startRow; row <= endRow; ++row) {
+    if (row === startRow) {
+      start = startColumn;
+      if (startRow === endRow) {
+        end = endColumn;
+      } else {
+        if (insert === true) {
+          end = array[row].length;
+        } else {
+          end = array[row].length - 1;
+        }
+      }
+    } else if (row === endRow) {
+      start = 0;
+      end = endColumn;
+    } else {
+      start = 0;
+      if (insert === true) {
+        end = array[row].length;
+      } else {
+        end = array[row].length - 1;
+      }
+    }
+    pushNoEmpty(result, arrayReplace(array[row], start, end, limitPop(data), insert));
+  }
+  return arrayReplace(array, startRow, endRow, result);
+}
+
+/**
+ *
+ * @param {string} string
+ * @param {string} separator
+ * @return {string[]}
+ */
+
+function splitIncludeSepatator(string, separator = "\n") {
+  const result = [];
+  let work = string;
+  let index = string.indexOf(separator);
+  let current = 0;
+  while (index !== -1) {
+    result.push(work.slice(current, index + separator.length));
+    work = work.slice(index + separator.length);
+    current = index + separator.length;
+    index = work.indexOf(separator);
+  }
+  result.push(work);
+  return result;
+}
+
+/**
+ *
+ * @param {any[][]} array
+ * @param {number} startRow
+ * @param {number} startColumn
+ * @param {number} endRow
+ * @param {number} endColumn
+ * @return {any[][]}
+ */
+
+function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) {
+  const result = [];
+  let start = 0;
+  let end = 0;
+  let endR = endRow !== null ? endRow : array.length - 1;
+  endR = endR > array.length - 1 ? array.length - 1 : endR;
+  for (let row = startRow; row <= endR; ++row) {
+    if (row === startRow) {
+      start = startColumn;
+      end = array[row].length;
+      if (startRow === endR) {
+        end = endColumn !== null ? endColumn : array[row].length;
+      }
+    } else if (row === endR) {
+      start = 0;
+      end = endColumn !== null ? endColumn : array[row].length;
+    } else {
+      start = 0;
+      end = array[row].length;
+    }
+    if (start !== end) {
+      result.push(array[row].slice(start, end));
+    }
+  }
+  return result;
+}
+
+/**
+ *
+ * @param {any[][]} array1
+ * @param {any[][]} array2
+ */
+function concat2d(array1, array2) {
+  const result = [];
+  for (const e of array1) {
+    result.push(e);
+  }
+  for (const e of array2) {
+    result.push(e);
+  }
+  return result;
+}
 ////////////////////////////////////////////////////////////////////////////////
 // vscode
 ////////////////////////////////////////////////////////////////////////////////
@@ -371,10 +613,7 @@ async function vsInsertLine(document, lineIndex, string) {
     return;
   }
 
-  let eol = "\n";
-  if (document.eol === vscode.EndOfLine.CRLF) {
-    eol = "\r\n";
-  }
+  const eol = getEol(document.eol);
   //const length = document.lineAt(lineIndex).text.length;
   const workspaceEdit = new vscode.WorkspaceEdit();
   workspaceEdit.insert(document.uri, new vscode.Position(lineIndex, 0), string + eol);
@@ -390,10 +629,8 @@ async function vsReplaceLine(document, lineIndex, string) {
   if (lineIndex < 0 || lineIndex > document.lineCount) {
     return;
   }
-  let eol = "\n";
-  if (document.eol === vscode.EndOfLine.CRLF) {
-    eol = "\r\n";
-  }
+
+  const eol = getEol(document.eol);
   //const length = document.lineAt(lineIndex).text.length;
   const workspaceEdit = new vscode.WorkspaceEdit();
   workspaceEdit.replace(document.uri, new vscode.Range(lineIndex, 0, lineIndex + 1, 0), string + eol);
@@ -418,6 +655,18 @@ async function fontZoomIn(level) {
   for (let i = 0; i < level; ++i) {
     await vscode.commands.executeCommand("editor.action.fontZoomIn");
   }
+}
+
+/**
+ *
+ * @param {number} num vscode.EndOfLine
+ */
+function getEol(num) {
+  let eol = "\n";
+  if (num === vscode.EndOfLine.CRLF) {
+    eol = "\r\n";
+  }
+  return eol;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -525,7 +774,7 @@ function getTextDocumentChangeEventInfo(event, separator = "\n") {
       event.document.positionAt(contentChange.rangeOffset + contentChange.rangeLength),
       ", "
     )}${separator}`;
-    result += `text: ${contentChange.text}${separator}`;
+    result += `text: "${contentChange.text}"${separator}`;
   }
   const re = new RegExp(`${separator}$`);
   result = result.replace(re, "");
@@ -558,13 +807,25 @@ exports.addLimit = addLimit;
 exports.isSameObj = isSameObj;
 exports.sortKey = sortKey;
 exports.uniquePush = uniquePush;
+exports.pushNoEmpty = pushNoEmpty;
 exports.convertToString = convertToString;
 exports.convertToNumber = convertToNumber;
+exports.RadixConverter = RadixConverter;
+
 exports.deleteLine = deleteLine;
 exports.insertLine = insertLine;
 exports.replaceLine = replaceLine;
 exports.isValidMargin = isValidMargin;
 exports.objToString = objToString;
+exports.countString = countString;
+
+exports.arrayReplace = arrayReplace;
+exports.limitPop = limitPop;
+exports.limitShift = limitShift;
+exports.slice2d = slice2d;
+exports.concat2d = concat2d;
+exports.arrayReplace2d = arrayReplace2d;
+exports.splitIncludeSepatator = splitIncludeSepatator;
 
 exports.revealCursor = revealCursor;
 exports.registerCommand = registerCommand;
@@ -582,6 +843,7 @@ exports.vsReplaceLine = vsReplaceLine;
 exports.fontZoomOut = fontZoomOut;
 exports.fontZoomIn = fontZoomIn;
 
+exports.getEol = getEol;
 // exports.getTextLines = getTextLines;
 // exports.outputToChannel = outputToChannel;
 // exports.getLastActiveEditor = getLastActiveEditor;

@@ -139,7 +139,7 @@ Then stop positions are as below.
   "boundary-move.capitalLetter": true,
 
   // This characters always detect as boundary.
-  "boundary-move.specialCharacters": "\"'`",
+  "boundary-move.specialCharacters": "\"'`()[]{}",
 
   // Improve Japanse boundary.
   "boundary-move.japanese": false,
