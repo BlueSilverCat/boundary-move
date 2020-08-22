@@ -24,9 +24,9 @@
 
 ## [0.1.2] 2020/08/08
 
-- Detect change event
-
 ### [Fixed]
+
+- Detect change event
 
 ## [0.1.1] 2020/08/07
 
