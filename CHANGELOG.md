@@ -1,5 +1,17 @@
 # Change Log
 
+## [0.2.3] 2020/08/23
+
+### [Fixed]
+
+- No concatenate Special characters.
+
+## [0.2.2] 2020/08/22
+
+### [Fixed]
+
+- Remake change behavior
+
 ## [0.2.1] 2020/08/12
 
 ### [Changed]
@@ -18,9 +30,9 @@
 
 ## [0.1.2] 2020/08/08
 
-- Detect change event
-
 ### [Fixed]
+
+- Detect change event
 
 ## [0.1.1] 2020/08/07
 
