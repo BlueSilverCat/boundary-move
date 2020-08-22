@@ -1146,6 +1146,22 @@ describe("Boundary Test", function () {
       const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
       assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("CCL", 2, 6), b("Nd", 8, 2)]);
     });
+
+    it("Special Characters", function () {
+      const boundaries = [b("SPC", 0, 1), b("CCL", 1, 4), b("SPC", 5, 1), b("SPC", 6, 1), b("SPC", 7, 1)];
+      const data = [b("SPC", 0, 1), b("Nd", 1, 2), b("SPC", 3, 1)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(actual, [
+        b("SPC", 0, 1),
+        b("CCL", 1, 4),
+        b("SPC", 5, 1),
+        b("SPC", 6, 1),
+        b("SPC", 7, 1),
+        b("SPC", 8, 1),
+        b("Nd", 9, 2),
+        b("SPC", 11, 1),
+      ]);
+    });
   });
 
   describe("check", function () {
