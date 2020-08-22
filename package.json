@@ -4,7 +4,7 @@
   "description": "move and jump cursors to boundary.",
   "publisher": "BlueSilverCat",
   "license": "MIT",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "engines": {
     "vscode": "^1.47.0"
   },
