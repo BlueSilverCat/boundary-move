@@ -400,21 +400,21 @@ function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) 
   return result;
 }
 
-/**
- *
- * @param {any[][]} array1
- * @param {any[][]} array2
- */
-function concat2d(array1, array2) {
-  const result = [];
-  for (const e of array1) {
-    result.push(e);
-  }
-  for (const e of array2) {
-    result.push(e);
-  }
-  return result;
-}
+// /**
+//  *
+//  * @param {any[][]} array1
+//  * @param {any[][]} array2
+//  */
+// function concat2d(array1, array2) {
+//   const result = [];
+//   for (const e of array1) {
+//     result.push(e);
+//   }
+//   for (const e of array2) {
+//     result.push(e);
+//   }
+//   return result;
+// }
 ////////////////////////////////////////////////////////////////////////////////
 // vscode
 ////////////////////////////////////////////////////////////////////////////////
@@ -823,7 +823,7 @@ exports.arrayReplace = arrayReplace;
 exports.limitPop = limitPop;
 exports.limitShift = limitShift;
 exports.slice2d = slice2d;
-exports.concat2d = concat2d;
+// exports.concat2d = concat2d;
 exports.arrayReplace2d = arrayReplace2d;
 exports.splitIncludeSepatator = splitIncludeSepatator;
 
