@@ -1,0 +1,4 @@
+12ab34cd
+abc123def456
+12Ab34Cd
+Abc123Def456

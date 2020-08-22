@@ -5,60 +5,6 @@ const path = require("path");
 const vscodeUtil = require("../../src/vscodeUtil.js");
 const boundary = require("../../src/boundary.js");
 
-const BOUNDARY01 = [
-  [b("Ll", 0, 3), b("CCL", 3, 6), b("Lu", 9, 3), b("Ll", 12, 3), b("EOL", 15, 0)],
-  [b("Ll", 0, 3), b("Nd", 3, 4), b("CCL", 7, 3), b("Ps", 10, 1), b("Pe", 11, 1), b("EOL", 12, 0)],
-  [
-    b("SPC", 0, 1),
-    b("SPC", 1, 1),
-    b("Ll", 2, 3),
-    b("Ps", 5, 1),
-    b("Pe", 6, 1),
-    b("Zs", 7, 2),
-    b("CCL", 9, 3),
-    b("Zs", 12, 2),
-    b("Ll", 14, 3),
-    b("Zs", 17, 2),
-    b("Lu", 19, 3),
-    b("Zs", 22, 2),
-    b("Ll", 24, 3),
-    b("EOL", 27, 0),
-  ],
-  [b("EOL", 0, 0)],
-];
-const BOUNDARY_MOVETEST = [
-  [b("Ll", 0, 2), b("Nd", 2, 2), b("Ll", 4, 2), b("Nd", 6, 2), b("Ll", 8, 2), b("Nd", 10, 2), b("EOL", 12, 0)],
-  [b("Ll", 0, 2), b("Nd", 2, 2), b("Ll", 4, 2), b("Nd", 6, 2), b("Ll", 8, 2), b("Nd", 10, 2), b("EOL", 12, 0)],
-  [b("Ll", 0, 2), b("Nd", 2, 2), b("Ll", 4, 2), b("Nd", 6, 2), b("Ll", 8, 2), b("Nd", 10, 2), b("EOL", 12, 0)],
-];
-
-// testData/decorationRange.txt
-const LINE_DECORATION_RANGES = [
-  d(0, 0, 3, 0, 0),
-  d(0, 4, 7, 1, 2),
-  d(0, 8, 11, 2, 4),
-  d(0, 12, 15, 3, 6),
-  d(0, 15, 15, 4, 7),
-];
-const DECORATION_RANGES = [
-  LINE_DECORATION_RANGES,
-  [d(1, 0, 3, 0, 0), d(1, 4, 7, 1, 2), d(1, 8, 11, 2, 4), d(1, 12, 15, 3, 6), d(1, 15, 15, 4, 7)],
-];
-
-const ROOT_URI = vscode.workspace.workspaceFolders[0].uri;
-const CONFIG_DEFAULT_DB = {
-  SpecialCharacters: "\"'`",
-  CapitalLetter: true,
-  Japanese: false,
-};
-
-const CONFIG_DEFAULT_BM = {
-  SpecialCharacters: "\"'`",
-  CapitalLetter: true,
-  Japanese: false,
-  MarkerMargin: "0ex 0.3ex 0ex 0.7ex",
-};
-
 function b(shortValue, start, length) {
   return boundary.DocumentBoundary.getBoundary(shortValue, start, length);
 }
@@ -76,6 +22,61 @@ function d(lineIndex, anchor, active, count, index) {
     index,
   };
 }
+
+const BOUNDARY01 = [
+  [b("Ll", 0, 3), b("CCL", 3, 6), b("Lu", 9, 3), b("Ll", 12, 3), b("EOL", 15, 1)],
+  [b("Ll", 0, 3), b("Nd", 3, 4), b("CCL", 7, 3), b("Ps", 10, 1), b("Pe", 11, 1), b("EOL", 12, 1)],
+  [
+    b("SPC", 0, 1),
+    b("SPC", 1, 1),
+    b("Ll", 2, 3),
+    b("Ps", 5, 1),
+    b("Pe", 6, 1),
+    b("Zs", 7, 2),
+    b("CCL", 9, 3),
+    b("Zs", 12, 2),
+    b("Ll", 14, 3),
+    b("Zs", 17, 2),
+    b("Lu", 19, 3),
+    b("Zs", 22, 2),
+    b("Ll", 24, 3),
+    b("EOL", 27, 1),
+  ],
+  [b("EOL", 0, 1)],
+];
+
+const BOUNDARY_MOVETEST = [
+  [b("Ll", 0, 2), b("Nd", 2, 2), b("Ll", 4, 2), b("Nd", 6, 2), b("Ll", 8, 2), b("Nd", 10, 2), b("EOL", 12, 1)],
+  [b("Ll", 0, 2), b("Nd", 2, 2), b("Ll", 4, 2), b("Nd", 6, 2), b("Ll", 8, 2), b("Nd", 10, 2), b("EOL", 12, 1)],
+  [b("Ll", 0, 2), b("Nd", 2, 2), b("Ll", 4, 2), b("Nd", 6, 2), b("Ll", 8, 2), b("Nd", 10, 2), b("EOL", 12, 1)],
+];
+
+// testData/decorationRange.txt
+const LINE_DECORATION_RANGES = [
+  d(0, 0, 3, 0, 0),
+  d(0, 4, 7, 1, 2),
+  d(0, 8, 11, 2, 4),
+  d(0, 12, 15, 3, 6),
+  d(0, 15, 16, 4, 7),
+];
+const DECORATION_RANGES = [
+  LINE_DECORATION_RANGES,
+  [d(1, 0, 3, 0, 0), d(1, 4, 7, 1, 2), d(1, 8, 11, 2, 4), d(1, 12, 15, 3, 6), d(1, 15, 16, 4, 7)],
+];
+
+const ROOT_URI = vscode.workspace.workspaceFolders[0].uri;
+const CONFIG_DEFAULT_DB = {
+  SpecialCharacters: "\"'`",
+  CapitalLetter: true,
+  Japanese: false,
+};
+
+const CONFIG_DEFAULT_BM = {
+  SpecialCharacters: "\"'`",
+  CapitalLetter: true,
+  Japanese: false,
+  MarkerMargin: "0ex 0.3ex 0ex 0.7ex",
+};
 
 function positionAssert(actual, expected) {
   for (let i = 0; i < actual.length; i++) {
@@ -127,10 +128,10 @@ let db = null;
 let bm = null;
 let channel = null;
 
-describe("UnicodeBoundary Test", function () {
+describe("Boundary Test", function () {
   //this.timeout(0);
 
-  before(async function () {
+  beforeEach(async function () {
     ({ db, document, editor } = await prepare1("boundary01.txt"));
   });
 
@@ -212,7 +213,7 @@ describe("UnicodeBoundary Test", function () {
     });
 
     describe("scan", function () {
-      it("test", function () {
+      it("test01", function () {
         const string = "function func(){";
         const result = boundary.DocumentBoundary.scan(string, boundary.DocumentBoundary.GeneralCategory, 0, false);
         result.sort(boundary.DocumentBoundary.sorter);
@@ -223,6 +224,19 @@ describe("UnicodeBoundary Test", function () {
           b("Ps", 13, 1),
           b("Pe", 14, 1),
           b("Ps", 15, 1),
+        ]);
+      });
+      it("test02 start", function () {
+        const string = "function func(){";
+        const result = boundary.DocumentBoundary.scan(string, boundary.DocumentBoundary.GeneralCategory, 5, false);
+        result.sort(boundary.DocumentBoundary.sorter);
+        assert.deepStrictEqual(result, [
+          b("Ll", 5, 8),
+          b("Zs", 13, 1),
+          b("Ll", 14, 4),
+          b("Ps", 18, 1),
+          b("Pe", 19, 1),
+          b("Ps", 20, 1),
         ]);
       });
     });
@@ -253,6 +267,24 @@ describe("UnicodeBoundary Test", function () {
           stringInfos: [s("abc", 1), s(", ", 5), s(", ", 9), s("012", 12)],
         });
       });
+
+      it("start=2", function () {
+        const string = "'abc', '', '012'";
+        const specialCharacters = "'";
+        const specialRegex = boundary.DocumentBoundary.compile(specialCharacters);
+        const result = boundary.DocumentBoundary.scanSpecialCharacter(string, specialRegex, 2);
+        assert.deepStrictEqual(result, {
+          boundaries: [
+            b("SPC", 2, 1),
+            b("SPC", 6, 1),
+            b("SPC", 9, 1),
+            b("SPC", 10, 1),
+            b("SPC", 13, 1),
+            b("SPC", 17, 1),
+          ],
+          stringInfos: [s("abc", 1), s(", ", 5), s(", ", 9), s("012", 12)],
+        });
+      });
     });
 
     describe("capitalLetter", function () {
@@ -265,7 +297,7 @@ describe("UnicodeBoundary Test", function () {
     });
 
     describe("scanLine", function () {
-      it("test", function () {
+      it("normal", function () {
         const line = "I like Cat.";
         const expected = [
           b("Lu", 0, 1),
@@ -274,9 +306,31 @@ describe("UnicodeBoundary Test", function () {
           b("Zs", 6, 1),
           b("CCL", 7, 3),
           b("Po", 10, 1),
-          b("EOL", 11, 0),
+          b("EOL", 11, 1),
         ];
         const result = db.scanLine(line);
+        assert.deepStrictEqual(result, expected);
+      });
+
+      it("eol=false", function () {
+        const line = "I like Cat.";
+        const expected = [b("Lu", 0, 1), b("Zs", 1, 1), b("Ll", 2, 4), b("Zs", 6, 1), b("CCL", 7, 3), b("Po", 10, 1)];
+        const result = db.scanLine(line, 0, false);
+        assert.deepStrictEqual(result, expected);
+      });
+
+      it("start", function () {
+        const line = "I like Cat.";
+        const expected = [
+          b("Lu", 3, 1),
+          b("Zs", 4, 1),
+          b("Ll", 5, 4),
+          b("Zs", 9, 1),
+          b("CCL", 10, 3),
+          b("Po", 13, 1),
+          b("EOL", 14, 1),
+        ];
+        const result = db.scanLine(line, 3, true);
         assert.deepStrictEqual(result, expected);
       });
     });
@@ -294,7 +348,7 @@ describe("UnicodeBoundary Test", function () {
             b("Pe", 15, 1),
             b("Zs", 16, 1),
             b("Ps", 17, 1),
-            b("EOL", 18, 0),
+            b("EOL", 18, 1),
           ],
           [
             b("Zs", 0, 2),
@@ -303,10 +357,10 @@ describe("UnicodeBoundary Test", function () {
             b("SPC", 9, 1),
             b("SPC", 10, 1),
             b("Po", 11, 1),
-            b("EOL", 12, 0),
+            b("EOL", 12, 1),
           ],
-          [b("Pe", 0, 1), b("EOL", 1, 0)],
-          [b("EOL", 0, 0)],
+          [b("Pe", 0, 1), b("EOL", 1, 1)],
+          [b("EOL", 0, 1)],
         ];
         const result = db.scanAll(document);
         assert.deepStrictEqual(result, expected);
@@ -475,44 +529,44 @@ describe("UnicodeBoundary Test", function () {
       });
     });
 
-    describe("modify", function () {
-      beforeEach(async function () {
-        ({ db, document, editor } = await prepare1("boundary01.txt"));
-      });
+    // describe("modify", function () {
+    //   beforeEach(async function () {
+    //     ({ db, document, editor } = await prepare1("boundary01.txt"));
+    //   });
 
-      it("no change", function () {
-        const length = db.lineBoundaries.length;
-        db.modify(0, 1);
-        assert.strictEqual(db.lineBoundaries.length, length);
-      });
+    //   it("no change", function () {
+    //     const length = db.lineBoundaries.length;
+    //     db.modify(0, 1);
+    //     assert.strictEqual(db.lineBoundaries.length, length);
+    //   });
 
-      it("delete", function () {
-        const length = db.lineBoundaries.length;
-        db.modify(-1, 1);
-        assert.strictEqual(db.lineBoundaries.length, length - 1);
-        const expected = Array.from(BOUNDARY01);
-        expected.splice(1, 1);
-        assert.deepStrictEqual(db.lineBoundaries, expected);
-      });
+    //   it("delete", function () {
+    //     const length = db.lineBoundaries.length;
+    //     db.modify(-1, 1);
+    //     assert.strictEqual(db.lineBoundaries.length, length - 1);
+    //     const expected = Array.from(BOUNDARY01);
+    //     expected.splice(1, 1);
+    //     assert.deepStrictEqual(db.lineBoundaries, expected);
+    //   });
 
-      it("add", async function () {
-        const length = db.lineBoundaries.length;
-        db.modify(1, 1);
-        assert.strictEqual(db.lineBoundaries.length, length + 1);
-        const expected = Array.from(BOUNDARY01);
-        expected.splice(1, 0, ...new Array(1));
-        assert.deepStrictEqual(db.lineBoundaries, expected);
-      });
-    });
+    //   it("add", async function () {
+    //     const length = db.lineBoundaries.length;
+    //     db.modify(1, 1);
+    //     assert.strictEqual(db.lineBoundaries.length, length + 1);
+    //     const expected = Array.from(BOUNDARY01);
+    //     expected.splice(1, 0, ...new Array(1));
+    //     assert.deepStrictEqual(db.lineBoundaries, expected);
+    //   });
+    // });
 
-    describe("changeLine", function () {
-      it("test", async function () {
-        ({ db, document, editor } = await prepare1("boundary01.txt"));
-        db.lineBoundaries = new Array(4);
-        db.changeLines(document, { start: 0, end: 3 });
-        assert.deepStrictEqual(db.lineBoundaries, BOUNDARY01);
-      });
-    });
+    // describe("changeLine", function () {
+    //   it("test", async function () {
+    //     ({ db, document, editor } = await prepare1("boundary01.txt"));
+    //     db.lineBoundaries = new Array(4);
+    //     db.changeLines(document, { start: 0, end: 3 });
+    //     assert.deepStrictEqual(db.lineBoundaries, BOUNDARY01);
+    //   });
+    // });
 
     describe("getLineInfo", function () {
       it("test", async function () {
@@ -770,7 +824,7 @@ describe("UnicodeBoundary Test", function () {
             b("Ll", 11, 2),
             b("Zs", 13, 1),
             b("Ll", 14, 3),
-            b("EOL", 17, 0),
+            b("EOL", 17, 1),
           ],
         ]);
       });
@@ -795,7 +849,7 @@ describe("UnicodeBoundary Test", function () {
             b("CCL", 10, 3),
             b("Zs", 13, 1),
             b("Ll", 14, 3),
-            b("EOL", 17, 0),
+            b("EOL", 17, 1),
           ],
         ]);
       });
@@ -814,7 +868,7 @@ describe("UnicodeBoundary Test", function () {
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
         assert.deepStrictEqual(db.lineBoundaries, [
-          [b("Lo", 0, 2), b("Po", 2, 1), b("Lo", 3, 9), b("Po", 12, 1), b("EOL", 13, 0)],
+          [b("Lo", 0, 2), b("Po", 2, 1), b("Lo", 3, 9), b("Po", 12, 1), b("EOL", 13, 1)],
         ]);
       });
 
@@ -839,7 +893,7 @@ describe("UnicodeBoundary Test", function () {
             b("Hani", 7, 2),
             b("Hira", 9, 3),
             b("Po", 12, 1),
-            b("EOL", 13, 0),
+            b("EOL", 13, 1),
           ],
         ]);
       });
@@ -868,7 +922,7 @@ describe("UnicodeBoundary Test", function () {
             b("Po", 12, 2),
             b("Sk", 14, 2),
             b("Zs", 16, 2),
-            b("EOL", 18, 0),
+            b("EOL", 18, 1),
           ],
         ]);
       });
@@ -907,13 +961,282 @@ describe("UnicodeBoundary Test", function () {
             b("SPC", 14, 1),
             b("SPC", 15, 1),
             b("Zs", 16, 2),
-            b("EOL", 18, 0),
+            b("EOL", 18, 1),
           ],
         ]);
       });
     });
   });
+
+  describe("getLineLength", function () {
+    it("test", function () {
+      assert.strictEqual(db.getLineLength(0), 16);
+      assert.strictEqual(db.getLineLength(1), 13);
+      assert.strictEqual(db.getLineLength(2), 28);
+    });
+  });
+
+  describe("sliceLine", function () {
+    beforeEach(async function () {
+      ({ db, document, editor } = await prepare1("sliceTest01.txt"));
+    });
+
+    it("test01", function () {
+      assert.deepStrictEqual(db.lineBoundaries, [
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 0, 3), b("Ll", 3, 6), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("CCL", 0, 3), b("EOL", 3, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+      const actual = db.sliceLine(0, 1, 3);
+      assert.deepStrictEqual(actual, [b("Nd", 1, 1), b("Ll", 2, 1)]);
+    });
+    it("test02", function () {
+      const actual = db.sliceLine(0, 2, 6);
+      assert.deepStrictEqual(actual, [b("Ll", 2, 2), b("Nd", 4, 2)]);
+    });
+    it("0,0", function () {
+      const actual = db.sliceLine(0, 0, 0);
+      assert.deepStrictEqual(actual, []);
+    });
+    it("0", function () {
+      const actual = db.sliceLine(0, 0);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)]);
+    });
+    it("test04", function () {
+      const actual = db.sliceLine(1, 5, 7);
+      assert.deepStrictEqual(actual, [b("Ll", 5, 2)]);
+    });
+    it("length", function () {
+      const actual = db.sliceLine(3, 1);
+      assert.deepStrictEqual(actual, []);
+    });
+    it("over length", function () {
+      const actual = db.sliceLine(3, 2);
+      assert.deepStrictEqual(actual, []);
+    });
+    it("slice Capital Letter 1", function () {
+      const actual = db.sliceLine(2, 0, 1);
+      assert.deepStrictEqual(actual, [b("Lu", 0, 1)]);
+    });
+    it("slice Capital Letter 2", function () {
+      const actual = db.sliceLine(2, 0, 2);
+      assert.deepStrictEqual(actual, [b("CCL", 0, 2)]);
+    });
+    it("slice Capital Letter 3", function () {
+      const actual = db.sliceLine(2, 1, 2);
+      assert.deepStrictEqual(actual, [b("Ll", 1, 1)]);
+    });
+  });
+
+  describe("slice", function () {
+    beforeEach(async function () {
+      ({ db, document, editor } = await prepare1("sliceTest02.txt"));
+    });
+
+    it("test01", function () {
+      assert.deepStrictEqual(db.lineBoundaries, [
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("CCL", 2, 2), b("Nd", 4, 2), b("CCL", 6, 2), b("EOL", 8, 1)],
+        [b("CCL", 0, 3), b("Nd", 3, 3), b("CCL", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+      const actual = db.slice(0, 0, 1, 0);
+      assert.deepStrictEqual(actual, [[b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)]]);
+    });
+    it("test02", function () {
+      const actual = db.slice(0, 3, 1, 5);
+      assert.deepStrictEqual(actual, [
+        [b("Ll", 3, 1), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 2)],
+      ]);
+    });
+    it("empty", function () {
+      const actual = db.slice(0, 0, 0, 0);
+      assert.deepStrictEqual(actual, []);
+    });
+    it("over", function () {
+      const actual = db.slice(6, 6);
+      assert.deepStrictEqual(actual, []);
+    });
+    it("all", function () {
+      const actual = db.slice(0, 0);
+      assert.deepStrictEqual(actual, [
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("CCL", 2, 2), b("Nd", 4, 2), b("CCL", 6, 2), b("EOL", 8, 1)],
+        [b("CCL", 0, 3), b("Nd", 3, 3), b("CCL", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+  });
+
+  describe("concatLine", function () {
+    // before(async function () {
+    //   ({ db, document, editor } = await prepare1("sliceTest01.txt"));
+    // });
+
+    it("test01", function () {
+      const boundaries = [b("Nd", 0, 2), b("Ll", 2, 2)];
+      const data = [b("Nd", 0, 2), b("Ll", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2)]);
+    });
+
+    it("test02", function () {
+      const boundaries = [b("Nd", 0, 2), b("Ll", 2, 2)];
+      const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 4), b("Nd", 6, 2)]);
+    });
+
+    it("test03", function () {
+      const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
+      const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 1), b("Ll", 3, 2), b("Nd", 5, 2)]);
+    });
+
+    it("concat data to empty", function () {
+      const boundaries = [];
+      const data = [b("Ll", 2, 2), b("Nd", 4, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, [b("Ll", 0, 2), b("Nd", 2, 2)]);
+    });
+
+    it("concat empty", function () {
+      const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
+      const data = [];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 1)]);
+    });
+
+    it("concat empty to empty", function () {
+      const boundaries = [];
+      const data = [];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, []);
+    });
+
+    it("Capital letter generete", function () {
+      const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
+      const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("CCL", 2, 3), b("Nd", 5, 2)]);
+    });
+
+    it("Capital letterfalse", function () {
+      const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
+      const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 1), b("Ll", 3, 2), b("Nd", 5, 2)]);
+    });
+
+    it("Capital letter split", function () {
+      const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
+      const data = [b("CCL", 0, 2), b("Nd", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 2), b("Ll", 4, 1), b("Nd", 5, 2)]);
+    });
+
+    it("Capital letter extend", function () {
+      const boundaries = [b("Nd", 0, 2), b("CCL", 2, 4)];
+      const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
+      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("CCL", 2, 6), b("Nd", 8, 2)]);
+    });
+  });
+
+  describe("check", function () {
+    it("test01", function () {
+      const boundaries = [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)];
+      const actual = boundary.DocumentBoundary.check(boundaries);
+      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)]);
+    });
+  });
+
+  describe("concat", function () {
+    it("with EOL", function () {
+      const boundaries1 = [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+      ];
+      const boundaries2 = [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+      ];
+      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(actual, [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+      ]);
+    });
+
+    it("no EOL", function () {
+      const boundaries1 = [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2)],
+      ];
+      const boundaries2 = [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+      ];
+      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(actual, [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("Nd", 8, 2), b("Ll", 10, 2), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
+      ]);
+    });
+
+    it("concat data to empty", function () {
+      const boundaries1 = [];
+      const boundaries2 = [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+      ];
+      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(actual, [
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+      ]);
+    });
+
+    it("concat empty", function () {
+      const boundaries1 = [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2)],
+      ];
+      const boundaries2 = [];
+      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(actual, [
+        [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Nd", 4, 2), b("Ll", 6, 2)],
+      ]);
+    });
+
+    it("concat empty to empty", function () {
+      const boundaries1 = [];
+      const boundaries2 = [];
+      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(actual, []);
+    });
+
+    it.skip("error concat empty to empty", function () {
+      const boundaries1 = [[]];
+      const boundaries2 = [[]];
+      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(actual, []);
+    });
+  });
 });
+
+////////////////////////////////////////////////////////////////////////////////
+// BoundaryManager
+////////////////////////////////////////////////////////////////////////////////
 
 describe("BoundaryManager", function () {
   this.timeout(5000);
@@ -998,31 +1321,193 @@ describe("BoundaryManager", function () {
     });
   });
 
-  describe("modify", function () {
-    beforeEach(async function () {
+  describe("getChange", function () {
+    it("no eol", async function () {
       ({ bm, channel, config, document, editor } = await prepare2("boundary01.txt"));
       bm.add(document);
-    });
-    it("no Change", function () {
-      bm.modify(0, 0, 0);
-      assert.strictEqual(bm.documentBoundaries.length, 1);
-      assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, BOUNDARY01);
+      const text = "abc123Abc";
+      const actual = bm.getChange(0, text, vscodeUtil.getEol(document.eol), 0);
+      assert.deepStrictEqual(actual, [[b("Ll", 0, 3), b("Nd", 3, 3), b("CCL", 6, 3)]]);
     });
 
-    it("delete", function () {
-      bm.modify(-1, 0, 0);
-      assert.strictEqual(bm.documentBoundaries.length, 1);
-      const expected = Array.from(BOUNDARY01);
-      expected.splice(0, 1);
-      assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, expected);
+    it("with eol", async function () {
+      ({ bm, channel, config, document, editor } = await prepare2("boundary01.txt"));
+      bm.add(document);
+      const text = "abc\n123\nAbc";
+      const actual = bm.getChange(0, text, vscodeUtil.getEol(document.eol), 2);
+      assert.deepStrictEqual(actual, [
+        [b("Ll", 2, 3), b("EOL", 5, 1)],
+        [b("Nd", 0, 3), b("EOL", 3, 1)],
+        [b("CCL", 0, 3)],
+      ]);
     });
 
-    it("add", function () {
-      bm.modify(1, 0, 0);
-      assert.strictEqual(bm.documentBoundaries.length, 1);
-      const expected = Array.from(BOUNDARY01);
-      expected.unshift(undefined);
-      assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, expected);
+    it("with eol", async function () {
+      ({ bm, channel, config, document, editor } = await prepare2("boundary01.txt"));
+      bm.add(document);
+      const text = "abc\n";
+      const actual = bm.getChange(0, text, vscodeUtil.getEol(document.eol), 0);
+      assert.deepStrictEqual(actual, [[b("Ll", 0, 3), b("EOL", 3, 1)]]);
+    });
+
+    it("empty", async function () {
+      ({ bm, channel, config, document, editor } = await prepare2("boundary01.txt"));
+      bm.add(document);
+      const text = "";
+      const actual = bm.getChange(0, text, vscodeUtil.getEol(document.eol), 0);
+      assert.deepStrictEqual(actual, []);
+    });
+  });
+
+  describe("replace", async function () {
+    beforeEach(async function () {
+      ({ bm, channel, config, document, editor } = await prepare2("changeTest01.txt"));
+      bm.add(document);
+    });
+
+    it("range is no length. data is empty", async function () {
+      const actual = bm.replace(bm.documentBoundaries[0], 0, 0, 0, 0, []);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is one line. data is empty", async function () {
+      const actual = bm.replace(bm.documentBoundaries[0], 0, 0, 1, 0, []);
+      assert.deepStrictEqual(actual, [
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is three lines. data is empty", async function () {
+      const actual = bm.replace(bm.documentBoundaries[0], 1, 0, 4, 0, []);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is boundary to boundary. data is empty", async function () {
+      const actual = bm.replace(bm.documentBoundaries[0], 1, 2, 1, 6, []);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is inside of boundary to inside of boundary. data is empty", async function () {
+      const actual = bm.replace(bm.documentBoundaries[0], 1, 1, 1, 3, []);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 1), b("Ll", 1, 1), b("Nd", 2, 2), b("Ll", 4, 2), b("EOL", 6, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is no length. data is one line", async function () {
+      const data = [[b("Ll", 0, 2), b("Nd", 2, 2)]];
+      const actual = bm.replace(bm.documentBoundaries[0], 2, 3, 2, 3, data);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 5), b("Nd", 5, 5), b("Ll", 10, 3), b("Nd", 13, 3), b("EOL", 16, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is no length. data is one line", async function () {
+      const data = [[b("Nd", 0, 2), b("Ll", 2, 2)]];
+      const actual = bm.replace(bm.documentBoundaries[0], 2, 3, 2, 3, data);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 2), b("Ll", 5, 2), b("Nd", 7, 3), b("Ll", 10, 3), b("Nd", 13, 3), b("EOL", 16, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is no length. data is two lines", async function () {
+      const data = [[b("Nd", 0, 2), b("EOL", 2, 1)], [b("Ll", 0, 2)]];
+      const actual = bm.replace(bm.documentBoundaries[0], 2, 3, 2, 3, data);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 2), b("EOL", 5, 1)],
+        [b("Ll", 0, 2), b("Nd", 2, 3), b("Ll", 5, 3), b("Nd", 8, 3), b("EOL", 11, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is two line. data is two lines", async function () {
+      const data = [[b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)]];
+      const actual = bm.replace(bm.documentBoundaries[0], 1, 2, 2, 3, data);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 2), b("EOL", 6, 1)],
+        [b("Nd", 0, 3), b("Ll", 3, 3), b("Nd", 6, 3), b("EOL", 9, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is two line. data is two lines", async function () {
+      const data = [[b("Nd", 0, 2), b("EOL", 2, 1)], [b("Ll", 0, 2)]];
+      const actual = bm.replace(bm.documentBoundaries[0], 1, 2, 2, 3, data);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 4), b("EOL", 4, 1)],
+        [b("Ll", 0, 2), b("Nd", 2, 3), b("Ll", 5, 3), b("Nd", 8, 3), b("EOL", 11, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
+    });
+
+    it("range is one line. data is one line", async function () {
+      const data = [[b("Nd", 0, 2), b("Ll", 2, 2)]];
+      const actual = bm.replace(bm.documentBoundaries[0], 1, 2, 2, 3, data);
+      assert.deepStrictEqual(actual, [
+        [b("EOL", 0, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 2), b("Nd", 6, 3), b("Ll", 9, 3), b("Nd", 12, 3), b("EOL", 15, 1)],
+        [b("Nd", 0, 4), b("Ll", 4, 4), b("Nd", 8, 4), b("Ll", 12, 4), b("EOL", 16, 1)],
+        [b("Ll", 0, 3), b("Nd", 3, 3), b("Ll", 6, 3), b("Nd", 9, 3), b("EOL", 12, 1)],
+        [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
+        [b("EOL", 0, 1)],
+      ]);
     });
   });
 
@@ -1054,7 +1539,7 @@ describe("BoundaryManager", function () {
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, BOUNDARY_MOVETEST);
       await vscodeUtil.vsInsertLine(document, 0, "123cat");
       const expected = Array.from(BOUNDARY_MOVETEST);
-      expected.splice(0, 0, [b("Nd", 0, 3), b("Ll", 3, 3), b("EOL", 6, 0)]);
+      expected.splice(0, 0, [b("Nd", 0, 3), b("Ll", 3, 3), b("EOL", 6, 1)]);
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, expected);
     });
     it("replaceLine", async function () {
@@ -1062,19 +1547,19 @@ describe("BoundaryManager", function () {
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, BOUNDARY_MOVETEST);
       await vscodeUtil.vsReplaceLine(document, 0, "456dog");
       const expected = Array.from(BOUNDARY_MOVETEST);
-      expected[0] = [b("Nd", 0, 3), b("Ll", 3, 3), b("EOL", 6, 0)];
+      expected[0] = [b("Nd", 0, 3), b("Ll", 3, 3), b("EOL", 6, 1)];
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, expected);
     });
 
-    it("deleteLine", async function () {
+    it.skip("format", async function () {
       this.timeout(0);
       ({ bm, channel, config, document, editor } = await prepare2("prettierTest01.js"));
       bm.add(document);
       assert.strictEqual(bm.documentBoundaries.length, 1);
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, [
-        [b("Po", 0, 2), b("Zs", 2, 1), b("Ll", 3, 8), b("Pd", 11, 1), b("Ll", 12, 6), b("EOL", 18, 0)],
-        [b("Ps", 0, 1), b("EOL", 1, 0)],
-        [b("Cc", 0, 1), b("Ll", 1, 8), b("CCL", 9, 7), b("Po", 16, 1), b("Zs", 17, 1), b("Ps", 18, 1), b("EOL", 19, 0)],
+        [b("Po", 0, 2), b("Zs", 2, 1), b("Ll", 3, 8), b("Pd", 11, 1), b("Ll", 12, 6), b("EOL", 18, 1)],
+        [b("Ps", 0, 1), b("EOL", 1, 1)],
+        [b("Cc", 0, 1), b("Ll", 1, 8), b("CCL", 9, 7), b("Po", 16, 1), b("Zs", 17, 1), b("Ps", 18, 1), b("EOL", 19, 1)],
         [
           b("Cc", 0, 2),
           b("Ll", 2, 6),
@@ -1084,17 +1569,17 @@ describe("BoundaryManager", function () {
           b("Ll", 11, 8),
           b("SPC", 19, 1),
           b("Pe", 20, 1),
-          b("EOL", 21, 0),
+          b("EOL", 21, 1),
         ],
-        [b("Pe", 0, 1), b("EOL", 1, 0)],
-        [b("EOL", 0, 0)],
+        [b("Pe", 0, 1), b("EOL", 1, 1)],
+        [b("EOL", 0, 1)],
       ]);
       await vscodeUtil.vsDeleteLine(document, 0);
       await vscode.commands.executeCommand("editor.action.formatDocument");
 
       assert.strictEqual(bm.documentBoundaries.length, 1);
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, [
-        [b("Ps", 0, 1), b("EOL", 1, 0)],
+        [b("Ps", 0, 1), b("EOL", 1, 1)],
         [
           b("Zs", 0, 2),
           b("Ll", 2, 8),
@@ -1102,7 +1587,7 @@ describe("BoundaryManager", function () {
           b("Po", 17, 1),
           b("Zs", 18, 1),
           b("Ps", 19, 1),
-          b("EOL", 20, 0),
+          b("EOL", 20, 1),
         ],
         [
           b("Zs", 0, 4),
@@ -1112,11 +1597,11 @@ describe("BoundaryManager", function () {
           b("SPC", 12, 1),
           b("Ll", 13, 8),
           b("SPC", 21, 1),
-          b("EOL", 22, 0),
+          b("EOL", 22, 1),
         ],
-        [b("Zs", 0, 2), b("Pe", 2, 1), b("EOL", 3, 0)],
-        [b("Pe", 0, 1), b("EOL", 1, 0)],
-        [b("EOL", 0, 0)],
+        [b("Zs", 0, 2), b("Pe", 2, 1), b("EOL", 3, 1)],
+        [b("Pe", 0, 1), b("EOL", 1, 1)],
+        [b("EOL", 0, 1)],
       ]);
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     });
@@ -1263,8 +1748,8 @@ describe("BoundaryManager", function () {
     });
 
     it("test", async function () {
-      const result = bm.getLineDecorationRanges(0, 0, vscodeUtil.convertToString(0));
-      assert.deepStrictEqual(result, LINE_DECORATION_RANGES);
+      const actual = bm.getLineDecorationRanges(0, 0, vscodeUtil.convertToString(0));
+      assert.deepStrictEqual(actual, LINE_DECORATION_RANGES);
     });
   });
 
@@ -1275,8 +1760,8 @@ describe("BoundaryManager", function () {
     });
 
     it("test", async function () {
-      const result = bm.getDecorationRanges(0, 0, 1);
-      assert.deepStrictEqual(result, DECORATION_RANGES);
+      const actual = bm.getDecorationRanges(0, 0, 1);
+      assert.deepStrictEqual(actual, DECORATION_RANGES);
     });
   });
 
@@ -1297,22 +1782,20 @@ describe("BoundaryManager", function () {
     });
   });
 
-  describe("compare", function () {
+  describe.skip("compare", function () {
     it("test", function () {
-      const x = { textContent: vscodeUtil.convertToString(0) };
-      const y = { textContent: vscodeUtil.convertToString(1) };
-      const z = { textContent: vscodeUtil.convertToString(2) };
-      let [left, right] = [0, 10];
-      //const target = vscodeUtil.convertToString(1);
-      const target = 1;
-      let result = boundary.BoundaryManager.compare(x, target, 5, left, right);
-      assert.deepStrictEqual(result, [6, 10]);
-
-      result = boundary.BoundaryManager.compare(y, target, 5, left, right);
-      assert.deepStrictEqual(result, [5]);
-
-      result = boundary.BoundaryManager.compare(z, target, 5, left, right);
-      assert.deepStrictEqual(result, [0, 4]);
+      // const x = { textContent: vscodeUtil.convertToString(0) };
+      // const y = { textContent: vscodeUtil.convertToString(1) };
+      // const z = { textContent: vscodeUtil.convertToString(2) };
+      // let [left, right] = [0, 10];
+      // //const target = vscodeUtil.convertToString(1);
+      // const target = 1;
+      // let result = boundary.compare(x, target, 5, left, right);
+      // assert.deepStrictEqual(result, [6, 10]);
+      // result = boundary.BoundaryManager.compare(y, target, 5, left, right);
+      // assert.deepStrictEqual(result, [5]);
+      // result = boundary.BoundaryManager.compare(z, target, 5, left, right);
+      // assert.deepStrictEqual(result, [0, 4]);
     });
   });
 

@@ -1,3 +1,101 @@
+# bug
+
+## change
+
+12ab34cd
+
+```javascript
+[
+  b("Nd", 0, 2),
+  b("Ll", 2, 2),
+  b("Nd", 4, 2),
+  b("Ll", 6, 2),
+  b("EOL", 8, 1),
+],
+```
+
+slice(1,3) 2b
+
+boundary.start + boundary.length < start ng
+boundary.start > end ng
+
+```javascript
+[
+  b("Nd", 1, 1),
+  b("Ll", 2, 1),
+],
+```
+
+slice(2,6) ab34
+
+```javascript
+[
+  b("Ll", 2, 2),
+  b("Nd", 4, 2),
+],
+```
+
+---
+
+`document.lineAt(i).text` で得られるデータは改行文字がない
+
+a 入力 ok
+change.range 0,0-0,0
+change.text "a"
+b("EOL", 1, 1)
+b("Ll", 0, 1), b("EOL", 1, 1)
+index 0,0 0,0
+
+a 削除 ok
+change.range 0,0-0,1
+change.text ""
+b("Ll", 0, 1), b("EOL", 1, 1)
+b("EOL", 0, 1)
+index 0,0 0,1
+
+1 行目削除 ok
+change.range 0,0-1,0
+change.text ""
+index 0,0 1,0
+
+1 行目挿入 ok
+change.range 0,0-0,0,
+change.text "\n"
+b("EOL", 0, 1)
+index 0,0 0,0
+
+2 行目の 2 文字目に a 挿入 ok
+2 行目の 2 文字目に a 削除 ok
+
+copy line down ok
+copy line up ok
+change.range 2,12-2,12,
+change.text "\nabc123def456"
+
+changeTest format
+"\n"
+needCheck 11,11
+8, 8
+1,1
+
+```
+function ff(array, startRow, startColumn, endRow, endColumn, data){
+  let head = twoDimensionalSlice(array, 0, 0, startRow, startColumn).join("\n");
+  let tail = twoDimensionalSlice(array, endRow, endColumn).join("\n")
+  data = data.join("\n");
+
+  let result = `${head},${data},${tail}`
+  result = result.split("\n")
+for (let i = 0; i < result.length; i++) {
+  result[i] = result[i].split(",");
+
+}
+```
+
+---
+
+# todo
+
 scroll 水平スクロール機能を修正しないと
 jump もう少し使い勝手を良くしたい
 change symbol rename で変更を正しく検出できなかった時があった
