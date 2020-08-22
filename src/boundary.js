@@ -552,7 +552,7 @@ class DocumentBoundary {
     let tail = null;
     if (result.length !== 0) {
       tail = result[result.length - 1];
-      if (tail.shortValue === data[0].shortValue || (tail.shortValue === "CCL" && data[0].shortValue === "Ll")) {
+      if (tail.shortValue === data[0].shortValue && tail.shortValue !== "SPC" || (tail.shortValue === "CCL" && data[0].shortValue === "Ll")) {
         tail.length += data[0].length;
         data.shift();
       } else if (capitalLetter === true && tail.shortValue === "Lu" && data[0].shortValue === "Ll") {

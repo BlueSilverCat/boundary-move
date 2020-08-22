@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.2.3] 2020/08/23
+
+### [Fixed]
+
+- No concatenate Special characters.
+
 ## [0.2.2] 2020/08/22
 
 ### [Fixed]
