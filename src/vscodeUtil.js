@@ -183,6 +183,13 @@ class RadixConverter {
   }
 }
 
+/**
+ *
+ * @param {string} text
+ * @param {number} lineIndex
+ * @param {string} eol
+ * @return {string}
+ */
 function deleteLine(text, lineIndex, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -192,6 +199,13 @@ function deleteLine(text, lineIndex, eol = "\n") {
   return array.join(eol);
 }
 
+/**
+ *
+ * @param {string} text
+ * @param {number} lineIndex
+ * @param {string} eol
+ * @return {string}
+ */
 function insertLine(text, lineIndex, string, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -202,6 +216,14 @@ function insertLine(text, lineIndex, string, eol = "\n") {
   return array.join(eol);
 }
 
+/**
+ *
+ * @param {string} text
+ * @param {number} lineIndex
+ * @param {string} string
+ * @param {string} eol
+ * @return {string}
+ */
 function replaceLine(text, lineIndex, string, eol = "\n") {
   const array = text.split(eol);
   if (lineIndex < 0 || lineIndex > array.length - 1) {
@@ -251,6 +273,7 @@ function arrayReplace(array, start, end, data, insert = false) {
   const tail = array.slice(tailIndex);
   return head.concat(data.concat(tail));
 }
+
 /*
  * array を pop する。ただし、空の場合は、valueを返す
  * @param{any[]} array
@@ -318,6 +341,13 @@ function arrayReplace2d(array, startRow, startColumn, endRow, endColumn, data, i
   return arrayReplace(array, startRow, endRow, result);
 }
 
+/**
+ *
+ * @param {string} string
+ * @param {string} separator
+ * @return {string[]}
+ */
+
 function splitIncludeSepatator(string, separator = "\n") {
   const result = [];
   let work = string;
@@ -332,6 +362,16 @@ function splitIncludeSepatator(string, separator = "\n") {
   result.push(work);
   return result;
 }
+
+/**
+ *
+ * @param {any[][]} array
+ * @param {number} startRow
+ * @param {number} startColumn
+ * @param {number} endRow
+ * @param {number} endColumn
+ * @return {any[][]}
+ */
 
 function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) {
   const result = [];
@@ -360,6 +400,11 @@ function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) 
   return result;
 }
 
+/**
+ *
+ * @param {any[][]} array1
+ * @param {any[][]} array2
+ */
 function concat2d(array1, array2) {
   const result = [];
   for (const e of array1) {
@@ -612,6 +657,10 @@ async function fontZoomIn(level) {
   }
 }
 
+/**
+ *
+ * @param {number} num vscode.EndOfLine
+ */
 function getEol(num) {
   let eol = "\n";
   if (num === vscode.EndOfLine.CRLF) {

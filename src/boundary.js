@@ -16,7 +16,7 @@ class DocumentBoundary {
    * @param {string} shortValue
    * @param {number} start
    * @param {number} length
-   * @returns {{ shortValue: string, start: number, length: number; }}
+   * @returns {{ shortValue: string, start: number, length: number }}
    */
   static getBoundary(shortValue, start, length) {
     return {
@@ -73,6 +73,7 @@ class DocumentBoundary {
   /**
    * @param {string} string
    * @param {{ shortValue: string, longValue: string, regex: RegExp }[]} regexes
+   * @param {number} start
    * @returns {{ shortValue: string, start: number, length: number }[]}
    */
   static scan(string, regexes, start = 0, japanese = false) {
@@ -96,19 +97,20 @@ class DocumentBoundary {
   /**
    * @param {string} line
    * @param {{shortValue: string, start: number, length: number}[]} boundaries
+   * @param {number} initial
    * @returns {{ start: number, string: string }[]}
    */
-  static getRestStrings(line, boundaries) {
+  static getRestStrings(line, boundaries, initial = 0) {
     let stringInfos = [];
     let start = 0;
-    let string = line.substring(0, boundaries[0].start);
+    let string = line.substring(0, boundaries[0].start - initial);
     if (string.length > 0) {
       stringInfos.push({ start, string });
     }
     for (let i = 0; i < boundaries.length; ++i) {
-      start = boundaries[i].start + boundaries[i].length;
+      start = boundaries[i].start - initial + boundaries[i].length;
       if (i !== boundaries.length - 1) {
-        string = line.substring(start, boundaries[i + 1].start);
+        string = line.substring(start, boundaries[i + 1].start - initial);
       } else {
         string = line.substring(start);
       }
@@ -135,7 +137,7 @@ class DocumentBoundary {
     if (boundaries.length === 0) {
       return ret;
     }
-    return { boundaries, stringInfos: DocumentBoundary.getRestStrings(line, boundaries) };
+    return { boundaries, stringInfos: DocumentBoundary.getRestStrings(line, boundaries, start) };
   }
 
   /**
@@ -192,33 +194,18 @@ class DocumentBoundary {
   scanAll(document) {
     let result = [];
     for (let i = 0; i < document.lineCount; ++i) {
-      console.log(`"${document.lineAt(i).text}"`);
       result.push(this.scanLine(document.lineAt(i).text));
     }
     return result;
   }
 
-  /**
-   * @param {vscode.TextDocument} document
-   * @param {{ start: number; end: number; }} lineIndex
-   */
-  changeLines(document, lineIndex) {
-    for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
-      this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
-    }
-  }
-
   // /**
-  //  * @param {number} diff
-  //  * @param {number} lineIndex
+  //  * @param {vscode.TextDocument} document
+  //  * @param {{ start: number; end: number; }} lineIndex
   //  */
-  // modify(diff, lineIndex) {
-  //   if (diff > 0) {
-  //     const insert = new Array(diff);
-  //     insert.fill([]);
-  //     this.lineBoundaries.splice(lineIndex, 0, ...insert);
-  //   } else if (diff < 0) {
-  //     this.lineBoundaries.splice(lineIndex, diff * -1);
+  // changeLines(document, lineIndex) {
+  //   for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
+  //     this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
   //   }
   // }
 
@@ -471,42 +458,23 @@ class DocumentBoundary {
     return uri.path === this.uri.path ? true : false;
   }
 
+  /**
+   *
+   * @param {number} lineIndex
+   * @returns {number}
+   */
   getLineLength(lineIndex) {
     const eolBoundary = this.lineBoundaries[lineIndex][this.lineBoundaries[lineIndex].length - 1];
     return eolBoundary.start + eolBoundary.length;
   }
 
-  slice(startRow, startColumn, endRow = null, endColumn = null) {
-    if (endRow === null || endRow >= this.lineBoundaries.length) {
-      endRow = this.lineBoundaries.length - 1;
-    }
-
-    const result = [];
-    let start = 0;
-    let end = 0;
-
-    for (let row = startRow; row <= endRow; ++row) {
-      const len = this.getLineLength(row);
-      if (row === startRow) {
-        start = startColumn;
-        end = len;
-        if (startRow === endRow) {
-          end = endColumn !== null ? endColumn : len;
-        }
-      } else if (row === endRow) {
-        start = 0;
-        end = endColumn !== null ? endColumn : len;
-      } else {
-        start = 0;
-        end = len;
-      }
-      if (start !== end) {
-        result.push(this.sliceLine(row, start, end));
-      }
-    }
-    return result;
-  }
-
+  /**
+   *
+   * @param {number} lineIndex
+   * @param {number} start 文字数
+   * @param {number} end 文字数
+   * @return {{shortValue:string, start:number, length:number}[]}
+   */
   sliceLine(lineIndex, start, end = null) {
     const len = this.getLineLength(lineIndex);
     if (end === null || end > len) {
@@ -542,39 +510,90 @@ class DocumentBoundary {
     return result;
   }
 
-  //"EOL" は無いものとする
-  static concatLine(lineBoundaries, data, capitalLetter) {
-    let result = Array.from(lineBoundaries);
-    if (data.length === 0) {
-      return result;
-    }
-    let tail = result[result.length - 1];
-    if (tail.shortValue === data[0].shortValue || (tail.shortValue === "CCL" && data[0].shortValue === "Ll")) {
-      tail.length += data[0].length;
-      data.shift();
-    } else if (capitalLetter === true && tail.shortValue === "Lu" && data[0].shortValue === "Ll") {
-      tail.shortValue = "CCL";
-      tail.length += data[0].length;
-      data.shift();
-    } else if (tail.shortValue === "Lu" && data[0].shortValue === "CCL") {
-      tail.length += 1;
-      data[0] = DocumentBoundary.getBoundary("Ll", data[0].start + 1, data[0].length - 1);
+  /**
+   *
+   * @param {number} startRow
+   * @param {number} startColumn 文字数
+   * @param {number} endRow
+   * @param {number} endColumn 文字数
+   * @return {{shortValue:string, start:number, length:number}[][]}
+   */
+  slice(startRow, startColumn, endRow = null, endColumn = null) {
+    if (endRow === null || endRow >= this.lineBoundaries.length) {
+      endRow = this.lineBoundaries.length - 1;
     }
 
-    for (const boundary of data) {
-      tail = result[result.length - 1];
-      boundary.start = tail.start + tail.length;
-      result.push(boundary);
+    const result = [];
+    let start = 0;
+    let end = 0;
+    for (let row = startRow; row <= endRow; ++row) {
+      const len = this.getLineLength(row);
+      if (row === startRow) {
+        start = startColumn;
+        end = len;
+        if (startRow === endRow) {
+          end = endColumn !== null ? endColumn : len;
+        }
+      } else if (row === endRow) {
+        start = 0;
+        end = endColumn !== null ? endColumn : len;
+      } else {
+        start = 0;
+        end = len;
+      }
+      if (start !== end) {
+        result.push(this.sliceLine(row, start, end));
+      }
     }
     return result;
   }
 
+  /**
+   *
+   * @param {{shortValue:string, start:number, length:number}[]} lineBoundaries "EOL" は無いものとする
+   * @param {{shortValue:string, start:number, length:number}[]} data
+   * @param {boolean} capitalLetter
+   */
+  static concatLine(lineBoundaries, data, capitalLetter) {
+    if (data.length === 0) {
+      return lineBoundaries;
+    }
+    let result = lineBoundaries;
+    let tail = null;
+    if (result.length !== 0) {
+      tail = result[result.length - 1];
+      if (tail.shortValue === data[0].shortValue || (tail.shortValue === "CCL" && data[0].shortValue === "Ll")) {
+        tail.length += data[0].length;
+        data.shift();
+      } else if (capitalLetter === true && tail.shortValue === "Lu" && data[0].shortValue === "Ll") {
+        tail.shortValue = "CCL";
+        tail.length += data[0].length;
+        data.shift();
+      } else if (tail.shortValue === "Lu" && data[0].shortValue === "CCL") {
+        tail.length += 1;
+        data[0] = DocumentBoundary.getBoundary("Ll", data[0].start + 1, data[0].length - 1);
+      }
+    }
+
+    for (const boundary of data) {
+      const work = Object.assign({}, boundary);
+      tail = result.length !== 0 ? result[result.length - 1] : { start: 0, length: 0 };
+      work.start = tail.start + tail.length;
+      result.push(work);
+    }
+    return result;
+  }
+
+  /**
+   *
+   * @param {{shortValue:string, start:number, length:number}[]} lineBoundaries
+   */
   static check(lineBoundaries) {
     const result = [];
     for (let i = 0; i < lineBoundaries.length; ++i) {
       const work = Object.assign({}, lineBoundaries[i]);
       if (i !== 0) {
-        work.start = lineBoundaries[i - 1].start + lineBoundaries[i - 1].length;
+        work.start = result[i - 1].start + result[i - 1].length;
       } else {
         work.start = 0;
       }
@@ -583,11 +602,15 @@ class DocumentBoundary {
     return result;
   }
 
+  /**
+   * @param {{shortValue:string, start:number, length:number}[][]} boundaries1
+   * @param {{shortValue:string, start:number, length:number}[][]} boundaries2
+   * @param {boolean} capitalLetter
+   */
   static concat(boundaries1, boundaries2, capitalLetter) {
-    let tail = [];
     let result = boundaries1;
     if (boundaries1.length !== 0) {
-      tail = boundaries1[boundaries1.length - 1][boundaries1[boundaries1.length - 1].length - 1];
+      const tail = boundaries1[boundaries1.length - 1][boundaries1[boundaries1.length - 1].length - 1];
       if (tail.shortValue !== "EOL") {
         result[result.length - 1] = DocumentBoundary.concatLine(
           boundaries1[boundaries1.length - 1],
@@ -754,90 +777,13 @@ class BoundaryManager {
     this.documentBoundaries.splice(index, 1);
   }
 
-  // /**
-  //  * @param {number} documentIndex
-  //  * @param {number} diff
-  //  * @param {number} start
-  //  */
-  // modify(documentIndex, diff, start) {
-  //   if (diff > 0) {
-  //     this.documentBoundaries[documentIndex].modify(diff, start + diff);
-  //   }
-  //   if (diff < 0) {
-  //     this.documentBoundaries[documentIndex].modify(diff, start);
-  //   }
-  // }
-
-  ff(documentBoundaries, startRow, startColumn, endRow, endColumn, data) {
-    let result = documentBoundaries.slice(0, 0, startRow, startColumn);
-    let tail = documentBoundaries.slice(endRow, endColumn);
-    result = DocumentBoundary.concat(result, data, this.CapitalLetter);
-    result = DocumentBoundary.concat(result, tail, this.CapitalLetter);
-    return result;
-    // // let needCheck = [];
-    // if (head.length !== 0) {
-    //   if (head[head.length - 1][head[head.length - 1].length - 1].shortValue !== "EOL") {
-    //     documentBoundaries.concatLine(head[head.length - 1], vscodeUtil.limitShift(data));
-    //     //head[head.length - 1] = head[head.length - 1].concat(vscodeUtil.limitShift(data));
-    //     // needCheck.push({ start: vscodeUtil.subLimit(head.length, 1), end: vscodeUtil.subLimit(head.length, 1) });
-    //     // head = [vscodeUtil.arrayReplace(head, head.length - 1, head[head.length - 1].length - 1, data.shift(), true)];
-    //   }
-    //   work = vscodeUtil.concat2d(head, data); // 空配列の扱い
-    //   // needCheck.push({
-    //   //   start: vscodeUtil.subLimit(head.length, 1),
-    //   //   end: vscodeUtil.subLimit(head.length, 1) + vscodeUtil.subLimit(data.length, 1),
-    //   // });
-    // } else {
-    //   work = data;
-    //   // needCheck.push({ start: 0, end: vscodeUtil.subLimit(data.length, 1) });
-    // }
-    // if (tail.length !== 0) {
-    //   if (
-    //     work.length !== 0 &&
-    //     work[work.length - 1].length !== 0 &&
-    //     work[work.length - 1][work[work.length - 1].length - 1].shortValue !== "EOL"
-    //   ) {
-    //     documentBoundaries.concatLine(work[work.length - 1], vscodeUtil.limitShift(tail));
-
-    //     // work[work.length - 1] = work[work.length - 1].concat(vscodeUtil.limitShift(tail));
-    //     // needCheck.push({ start: vscodeUtil.subLimit(work.length, 1), end: vscodeUtil.subLimit(work.length, 1) });
-    //     // result = [
-    //     //   vscodeUtil.arrayReplace(result, result.length - 1, result[result.length - 1].length - 1, tail.shift(), true),
-    //     // ];
-    //   }
-    //   work = vscodeUtil.concat2d(work, tail); // 空配列の扱い
-    //   // needCheck.push({ start: vscodeUtil.subLimit(work.length, 1), end: vscodeUtil.subLimit(work.length, 1) });
-    // }
-    // documentBoundaries.lineBoundaries = work;
-    // // needCheck = needCheck.filter((e, i, a) => {
-    // //   if (i !== a.length - 1 && a[i].start === a[i + 1].start && a[i].end === a[i + 1].end) {
-    // //     return false;
-    // //   }
-    // //   return true;
-    // // });
-    // // return needCheck;
-  }
-
-  // getIndex(documentIndex, lineIndex, character) {
-  //   const boundaries = this.documentBoundaries[documentIndex].lineBoundaries[lineIndex];
-  //   for (let i = 0; i < boundaries.length; ++i) {
-  //     if (
-  //       character === boundaries[i].start ||
-  //       (character > boundaries[i].start && character < boundaries[i].start + boundaries[i].length)
-  //     ) {
-  //       return i;
-  //     }
-  //   }
-  //   return -1;
-  // }
-
   /**
    *
    * @param {string} text
    * @param {string} eol
+   * @returns {{ shortValue: string, start: number, length: number }[][]}
    */
   getChange(documentIndex, text, eol, start) {
-    // const lines = vscodeUtil.splitIncludeSepatator(text, eol);
     const lines = text.split(eol);
     const result = [];
     let eolFlag = false;
@@ -848,44 +794,29 @@ class BoundaryManager {
       } else {
         eolFlag = false;
       }
-      // result.push(this.documentBoundaries[documentIndex].scanLine(lines[i], s, eolFlag));
       vscodeUtil.pushNoEmpty(result, this.documentBoundaries[documentIndex].scanLine(lines[i], s, eolFlag)); // 空配列の扱い
       s = 0;
-      console.log(result[i]);
     }
     return result;
   }
 
-  // check(document, documentBoundaries, needCheck) {
-  //   for (const { start, end } of needCheck) {
-  //     for (let i = start; i <= end; ++i) {
-  //       documentBoundaries.lineBoundaries[i] = documentBoundaries.scanLine(document.lineAt(i).text);
-  //     }
-  //   }
-  // }
-
-  // check(documentIndex, startLine, endLine) {
-  //   for (let i = startLine; i <= endLine; ++i) {
-  //     let length = 0;
-  //     const boundaries = this.documentBoundaries[documentIndex].lineBoundaries[i];
-  //     if (boundaries.length === 0) {
-  //       continue;
-  //     }
-  //     for (let j = 0; j < boundaries.length; ++j) {
-  //       if (boundaries[j].shortValue === "EOL") {
-  //         boundaries.splice(j, 1);
-  //       } else if (j !== boundaries.length - 1 && boundaries[j].shortValue === boundaries[j + 1].shortValue) {
-  //         boundaries[j].length = boundaries[j].length + boundaries[j + 1].length;
-  //         boundaries.splice(j + 1, 1);
-  //       }
-  //       if (j < boundaries.length) {
-  //         boundaries[j].start = length;
-  //         length += boundaries[j].length;
-  //       }
-  //     }
-  //     boundaries.push(DocumentBoundary.getBoundary("EOL", length, 1));
-  //   }
-  // }
+  /**
+   *
+   * @param {DocumentBoundary} documentBoundaries
+   * @param {number} startRow
+   * @param {number} startColumn
+   * @param {number} endRow
+   * @param {number} endColumn
+   * @param {{ shortValue: string, start: number, length: number }[][]} data
+   * @returns {{ shortValue: string, start: number, length: number }[][]}
+   */
+  replace(documentBoundaries, startRow, startColumn, endRow, endColumn, data) {
+    let result = documentBoundaries.slice(0, 0, startRow, startColumn);
+    let tail = documentBoundaries.slice(endRow, endColumn);
+    result = DocumentBoundary.concat(result, data, this.CapitalLetter);
+    result = DocumentBoundary.concat(result, tail, this.CapitalLetter);
+    return result;
+  }
 
   /**
    * もう少し効率よくしたい
@@ -902,22 +833,12 @@ class BoundaryManager {
       return;
     }
 
-    console.log(vscodeUtil.getTextDocumentChangeEventInfo(event));
+    // console.log(vscodeUtil.getTextDocumentChangeEventInfo(event));
     let statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanMessage);
     for (const change of event.contentChanges) {
-      const eolCount = vscodeUtil.getEol(event.document.eol);
-      const data = this.getChange(documentIndex, change.text, eolCount, change.range.start.character);
-
-      // console.log(
-      //   `${change.range.start.line},${this.getIndex(
-      //     documentIndex,
-      //     change.range.start.line,
-      //     change.range.start.character
-      //   )}`,
-      //   `${change.range.end.line},${this.getIndex(documentIndex, change.range.end.line, change.range.end.character)}`
-      // );
-      // // this.documentBoundaries[documentIndex].modify(vscodeUtil.subLimit(data.length, 1), change.range.start.line);
-      this.documentBoundaries[documentIndex].lineBoundaries = this.ff(
+      const eol = vscodeUtil.getEol(event.document.eol);
+      const data = this.getChange(documentIndex, change.text, eol, change.range.start.character);
+      this.documentBoundaries[documentIndex].lineBoundaries = this.replace(
         this.documentBoundaries[documentIndex],
         change.range.start.line,
         change.range.start.character,
@@ -925,13 +846,6 @@ class BoundaryManager {
         change.range.end.character,
         data
       );
-      // this.check(event.document, this.documentBoundaries[documentIndex], needCheck);
-      // console.log(
-      //   `${change.range.start.line}, ${change.range.start.character} -- ${change.range.end.line}, ${change.range.end.character}`
-      // );
-      for (const x of this.documentBoundaries[documentIndex].lineBoundaries) {
-        console.log(x);
-      }
     }
     statusBar.dispose();
     statusBar = vscode.window.setStatusBarMessage(BoundaryManager.ScanEndMessage, BoundaryManager.MessageTimeout);
