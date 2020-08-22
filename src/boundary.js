@@ -199,16 +199,6 @@ class DocumentBoundary {
     return result;
   }
 
-  // /**
-  //  * @param {vscode.TextDocument} document
-  //  * @param {{ start: number; end: number; }} lineIndex
-  //  */
-  // changeLines(document, lineIndex) {
-  //   for (let i = lineIndex.start; i < document.lineCount && i <= lineIndex.end; ++i) {
-  //     this.lineBoundaries[i] = this.scanLine(document.lineAt(i).text);
-  //   }
-  // }
-
   /**
    * @param {vscode.TextEditor} editor
    * @returns {{line: number, character: number}[]}
