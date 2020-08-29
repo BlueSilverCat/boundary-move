@@ -709,6 +709,7 @@ class BoundaryManager {
     this.SpecialCharacters = config.get("specialCharacters", BoundaryManager.DefaultSpecialCharacters);
     this.CapitalLetter = config.get("capitalLetter", BoundaryManager.DefaultCapitalLetter);
     this.Japanese = config.get("japanese", BoundaryManager.DefaultJapanese);
+    this.JumpZoomOutLevel = config.get("jumpZoomOutLevel", BoundaryManager.DefaultJumpZoomOutLevel);
     this.AlwaysCenter = config.get("alwaysCenter", BoundaryManager.DefaultAlwaysCenter);
     this.JumpToCenter = config.get("jumpToCenter", BoundaryManager.DefaultJumpToCenter);
     const margin = config.get("markerMargin", BoundaryManager.DefaultMargin);
@@ -720,13 +721,14 @@ class BoundaryManager {
   }
 
   /**
-   * @return {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, MarkerMargin: string, AlwaysCenter: boolean, JumpToCenter: boolean }}
+   * @return {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, JumpZoomOutLevel: number, MarkerMargin: string, AlwaysCenter: boolean, JumpToCenter: boolean }}
    */
   getConfig() {
     return {
       SpecialCharacters: this.SpecialCharacters,
       CapitalLetter: this.CapitalLetter,
       Japanese: this.Japanese,
+      JumpZoomOutLevel: this.JumpZoomOutLevel,
       MarkerMargin: this.MarkerMargin,
       AlwaysCenter: this.AlwaysCenter,
       JumpToCenter: this.JumpToCenter,
@@ -917,11 +919,59 @@ class BoundaryManager {
 
   /**
    * @param {vscode.TextEditor} editor
-   * @param {number} documentIndex
-   * @param {number} lineIndex
-   * @param {number} count
    */
-  jump(editor, documentIndex, lineIndex, count) {
+  async jump(editor) {
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomOut(this.JumpZoomOutLevel);
+    }
+    const { documentIndex, start, end } = this.getVisibleRange(editor);
+    if (documentIndex === -1 || end - start <= 0) {
+      if (this.JumpZoomOutLevel > 0) {
+        await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+      }
+      return;
+    }
+    const decorationRanges = this.getDecorationRanges(documentIndex, start, end);
+    const decorationTypes = this.setDecorations(editor, decorationRanges);
+    const result = await this.showBoundaryInputRange(decorationRanges);
+    decorationTypes.dispose();
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+    }
+    if (result === null) {
+      return;
+    }
+
+    this.documentBoundaries[documentIndex].jump(editor, result.lineIndex, result.count);
+  }
+
+  async jumpLine(editor) {
+    const { documentIndex, lineCount } = this.getLineCount(editor);
+    if (documentIndex === -1 || lineCount <= 0) {
+      return;
+    }
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomOut(this.JumpZoomOutLevel);
+    }
+    const lineIndex = await BoundaryManager.showLineInput(lineCount, editor.selection.active.line);
+    if (lineIndex === -1) {
+      if (this.JumpZoomOutLevel > 0) {
+        await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+      }
+      return;
+    }
+
+    const lineDecorationRanges = this.getLineDecorationRanges(documentIndex, lineIndex);
+    const decorationTypes = this.setDecorations(editor, [lineDecorationRanges]);
+    const count = await this.showBoundaryInput(lineDecorationRanges);
+    decorationTypes.dispose();
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+    }
+    if (count === -1) {
+      return;
+    }
+
     this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
   }
 
@@ -1062,6 +1112,97 @@ class BoundaryManager {
     }
     return null;
   }
+  /**
+   * @param {import("vscode").TextEditor} editor
+   * @param {{range: import("vscode").Range, textContent: string, index: number}[][]} decorationRanges
+   */
+  setDecorations(editor, decorationRanges) {
+    const decorationType = vscode.window.createTextEditorDecorationType({});
+    const options = [];
+    for (const lineDecorationRanges of decorationRanges) {
+      for (const option of lineDecorationRanges) {
+        options.push({
+          range: option.range,
+          renderOptions: {
+            before: {
+              contentText: option.textContent,
+              margin: this.MarkerMargin,
+              fontStyle: "normal",
+              fontWeight: "normal",
+              color: { id: "boundaryMove.markerColor" },
+              backgroundColor: { id: "boundaryMove.markerBackgroundColor" },
+            },
+          },
+        });
+      }
+    }
+    editor.setDecorations(decorationType, options);
+    return decorationType;
+  }
+
+  /**
+   * @param {number} lineCount
+   */
+  static async showLineInput(lineCount, currentLine) {
+    const rangeString = `range: 1 -- ${lineCount}`;
+    const line = (currentLine + 1).toString(10);
+    const result = await vscode.window.showInputBox({
+      placeHolder: rangeString,
+      prompt: `Input line index for jump. ${rangeString}`,
+      value: line,
+      valueSelection: [0, line.length],
+    });
+    if (vscodeUtil.isEmpty(result) === true) {
+      return -1;
+    }
+    let lineIndex = parseInt(result, 10) - 1;
+    if (lineIndex < 0) {
+      lineIndex = 0;
+    } else if (lineIndex >= lineCount) {
+      lineIndex = lineCount - 1;
+    }
+    return lineIndex;
+  }
+
+  /**
+   * @param {{range: import("vscode").Range, textContent: string, index: number}[]} lineDecorationRanges
+   */
+  async showBoundaryInput(lineDecorationRanges) {
+    const rangeString = `range: a -- ${this.converter.convertToString(lineDecorationRanges.length - 1)}`;
+    const result = await vscode.window.showInputBox({
+      placeHolder: rangeString,
+      prompt: `Input boundary index for jump. ${rangeString}`,
+      value: "a",
+    });
+    if (vscodeUtil.isEmpty(result) === true) {
+      return -1;
+    }
+    let i = this.converter.convertToNumber(result);
+    let count = 0;
+    if (i < 0) {
+      count = lineDecorationRanges[0].index;
+    } else if (i >= lineDecorationRanges.length) {
+      count = lineDecorationRanges[lineDecorationRanges.length - 1].index;
+    } else {
+      count = lineDecorationRanges[i].index;
+    }
+    return count;
+  }
+
+  async showBoundaryInputRange(decorationRanges) {
+    const rangeString = `range: aa -- ${
+      decorationRanges[decorationRanges.length - 1][decorationRanges[decorationRanges.length - 1].length - 1]
+        .textContent
+    }`;
+    const input = await vscode.window.showInputBox({
+      placeHolder: rangeString,
+      prompt: `Input boundary index for jump. ${rangeString}`,
+    });
+    if (vscodeUtil.isEmpty(input) === true) {
+      return null;
+    }
+    return this.search(decorationRanges, input);
+  }
 
   info() {
     this.channel.appendLine(`Documents: ${this.documentBoundaries.length}`);
@@ -1093,6 +1234,7 @@ BoundaryManager.ScanEndMessage = "Boundary Move Scan End.";
 BoundaryManager.MessageTimeout = 3000;
 BoundaryManager.DefaultCapitalLetter = true;
 BoundaryManager.DefaultJapanese = false;
+BoundaryManager.DefaultJumpZoomOutLevel = 1;
 BoundaryManager.DefaultAlwaysCenter = false;
 BoundaryManager.DefaultJumpToCenter = false;
 BoundaryManager.DefaultSpecialCharacters = "\"'`()[]{}";

@@ -400,21 +400,6 @@ function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) 
   return result;
 }
 
-// /**
-//  *
-//  * @param {any[][]} array1
-//  * @param {any[][]} array2
-//  */
-// function concat2d(array1, array2) {
-//   const result = [];
-//   for (const e of array1) {
-//     result.push(e);
-//   }
-//   for (const e of array2) {
-//     result.push(e);
-//   }
-//   return result;
-// }
 ////////////////////////////////////////////////////////////////////////////////
 // vscode
 ////////////////////////////////////////////////////////////////////////////////
@@ -510,72 +495,9 @@ async function revealCursor(editor, center = false) {
   }
 }
 
-// async function ff(editor) {
-//   const line = editor.selection.active.line;
-//   if (line < editor.visibleRanges[0].end.line) {
-//     await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" }); //実際に見えている範囲より-1された範囲がvisibleRangeとして認識される
-//   }
-//   // } else {
-//   //   const character = editor.selection.active.character;
-//   //   if (character === editor.document.lineAt(editor.selection.active.line).range.end.character) {
-//   //     await vscode.commands.executeCommand("cursorLineEnd");
-//   //   } else if (character === 0) {
-//   //     await vscode.commands.executeCommand("cursorLineStart");
-//   //   } else {
-//   //     await vscode.commands.executeCommand("cursorMove", { to: "left" });
-//   //     await vscode.commands.executeCommand("cursorMove", { to: "right" });
-//   //   }
-//   // }
-// }
-
 async function cursorToCenter(editor) {
-  // const position = new vscode.Range(editor.selection.active, editor.selection.active);
-  // editor.revealRange(position, vscode.TextEditorRevealType.InCenter);
   vscode.commands.executeCommand("revealLine", { lineNumber: editor.selection.active.line, at: "center" });
 }
-
-// visibleRangesが複数の場合は、どんな時?
-// editor.visibleRanges.lengthが取れないのはなぜ?
-// editor.visibleRanges readonly
-// editor.revealRange()は、タイムラグがある割がawaitが使えないので使い勝手が悪い
-// async function revealCursor(editor, type = 0) {
-//   //need fix
-//   const line = editor.selection.active.line;
-//   // const character = editor.selection.active.character;
-//   for (let i = 0; i < 1; ++i) {
-//     // if (line > editor.visibleRanges[i].start.line && line < editor.visibleRanges[i].end.line) {
-//     //   await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
-//     //   continue;
-//     // }
-
-//     let diff = 0;
-//     diff = editor.visibleRanges[i].start.line - line + 1;
-//     if (diff > 0) {
-//       editor.revealRange(
-//         new vscode.Range(
-//           subLimit(editor.visibleRanges[i].start.line, diff),
-//           0,
-//           subLimit(editor.visibleRanges[i].end.line, diff),
-//           0
-//         ),
-//         type
-//       );
-//       continue;
-//     }
-//     diff = line - editor.visibleRanges[i].end.line + 1;
-//     if (diff > 0) {
-//       editor.revealRange(
-//         new vscode.Range(
-//           addLimit(editor.visibleRanges[i].start.line, diff, editor.document.lineCount),
-//           0,
-//           addLimit(editor.visibleRanges[i].end.line, diff, editor.document.lineCount),
-//           0
-//         ),
-//         type
-//       );
-//     }
-//   }
-// }
 
 /**
  * @param {vscode.ExtensionContext} context
