@@ -76,6 +76,16 @@
           "type": "number",
           "default": 1,
           "description": "Zoom out before jump. 0 is no Zoom out."
+        },
+        "boundaryMove.alwaysCenter": {
+          "type": "boolean",
+          "default": false,
+          "description": "Center cursor always."
+        },
+        "boundaryMove.jumpToCenter": {
+          "type": "boolean",
+          "default": false,
+          "description": "Center cursor after jump."
         }
       }
     },

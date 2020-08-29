@@ -160,9 +160,9 @@ function activate(context) {
   /**
    * @param {number} lineCount
    */
-  async function showLineInput(lineCount, currntLine) {
+  async function showLineInput(lineCount, currentLine) {
     const rangeString = `range: 1 -- ${lineCount}`;
-    const line = (currntLine + 1).toString(10);
+    const line = (currentLine + 1).toString(10);
     const result = await vscode.window.showInputBox({
       placeHolder: rangeString,
       prompt: `Input line index for jump. ${rangeString}`,
@@ -207,7 +207,10 @@ function activate(context) {
   }
 
   async function showBoundaryInputRange(decorationRanges) {
-    const rangeString = `range: aa -- ${decorationRanges[decorationRanges.length - 1][decorationRanges[decorationRanges.length - 1].length - 1].textContent}`;
+    const rangeString = `range: aa -- ${
+      decorationRanges[decorationRanges.length - 1][decorationRanges[decorationRanges.length - 1].length - 1]
+        .textContent
+    }`;
     const input = await vscode.window.showInputBox({
       placeHolder: rangeString,
       prompt: `Input boundary index for jump. ${rangeString}`,
@@ -220,12 +223,12 @@ function activate(context) {
 
   /**
    * @param {import("vscode").TextEditor} editor
-   * @param {{range: import("vscode").Range, textContent: string, index: number}[][]} decoratonRanges
+   * @param {{range: import("vscode").Range, textContent: string, index: number}[][]} decorationRanges
    */
-  function setDecorations(editor, decoratonRanges) {
+  function setDecorations(editor, decorationRanges) {
     const decorationType = vscode.window.createTextEditorDecorationType({});
     const options = [];
-    for (const lineDecorationRanges of decoratonRanges) {
+    for (const lineDecorationRanges of decorationRanges) {
       for (const option of lineDecorationRanges) {
         options.push({
           range: option.range,
@@ -248,7 +251,7 @@ function activate(context) {
 }
 exports.activate = activate;
 
-function deactivate() { }
+function deactivate() {}
 
 module.exports = {
   activate,

@@ -4,7 +4,7 @@ const vscodeUtil = require("./vscodeUtil.js");
 class DocumentBoundary {
   /**
    * @param {vscode.TextDocument} document
-   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean }} config
+   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, AlwaysCenter: boolean, JumpToCenter: boolean }} config
    */
   constructor(document, config) {
     this.uri = document.uri;
@@ -53,12 +53,14 @@ class DocumentBoundary {
   }
 
   /**
-   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean }} config
+   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, AlwaysCenter: boolean, JumpToCenter: boolean }} config
    */
   setConfig(config) {
     this.SpecialRegex = DocumentBoundary.compile(config.SpecialCharacters);
     this.CapitalLetter = config.CapitalLetter;
     this.Japanese = config.Japanese;
+    this.AlwaysCenter = config.AlwaysCenter;
+    this.JumpToCenter = config.JumpToCenter;
   }
 
   /**
@@ -269,6 +271,9 @@ class DocumentBoundary {
    */
   moveLeft(editor) {
     vscodeUtil.moveCursors(editor, this.getPositionsLeft(editor));
+    if (this.AlwaysCenter === true) {
+      vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -276,6 +281,9 @@ class DocumentBoundary {
    */
   moveRight(editor) {
     vscodeUtil.moveCursors(editor, this.getPositionsRight(editor));
+    if (this.AlwaysCenter === true) {
+      vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -283,6 +291,9 @@ class DocumentBoundary {
    */
   selectLeft(editor) {
     vscodeUtil.moveSelections(editor, this.getPositionsLeft(editor));
+    if (this.AlwaysCenter === true) {
+      vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -290,6 +301,9 @@ class DocumentBoundary {
    */
   selectRight(editor) {
     vscodeUtil.moveSelections(editor, this.getPositionsRight(editor));
+    if (this.AlwaysCenter === true) {
+      vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -304,6 +318,9 @@ class DocumentBoundary {
     const boundary = this.lineBoundaries[lineIndex][count];
     const positions = [{ line: lineIndex, character: boundary.start }];
     vscodeUtil.moveCursors(editor, positions);
+    if (this.JumpToCenter === true) {
+      vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -689,9 +706,11 @@ class BoundaryManager {
    * @param {vscode.WorkspaceConfiguration} config
    */
   setConfig(config) {
-    this.SpecialCharacters = config.get("specialCharacters", BoundaryManager.DefaultSpecialCharactors);
+    this.SpecialCharacters = config.get("specialCharacters", BoundaryManager.DefaultSpecialCharacters);
     this.CapitalLetter = config.get("capitalLetter", BoundaryManager.DefaultCapitalLetter);
     this.Japanese = config.get("japanese", BoundaryManager.DefaultJapanese);
+    this.AlwaysCenter = config.get("alwaysCenter", BoundaryManager.DefaultAlwaysCenter);
+    this.JumpToCenter = config.get("jumpToCenter", BoundaryManager.DefaultJumpToCenter);
     const margin = config.get("markerMargin", BoundaryManager.DefaultMargin);
     if (vscodeUtil.isValidMargin(margin) === false) {
       this.MarkerMargin = BoundaryManager.DefaultMargin;
@@ -701,7 +720,7 @@ class BoundaryManager {
   }
 
   /**
-   * @return {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, MarkerMargin: string }}
+   * @return {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, MarkerMargin: string, AlwaysCenter: boolean, JumpToCenter: boolean }}
    */
   getConfig() {
     return {
@@ -709,6 +728,8 @@ class BoundaryManager {
       CapitalLetter: this.CapitalLetter,
       Japanese: this.Japanese,
       MarkerMargin: this.MarkerMargin,
+      AlwaysCenter: this.AlwaysCenter,
+      JumpToCenter: this.JumpToCenter,
     };
   }
 
@@ -1072,7 +1093,9 @@ BoundaryManager.ScanEndMessage = "Boundary Move Scan End.";
 BoundaryManager.MessageTimeout = 3000;
 BoundaryManager.DefaultCapitalLetter = true;
 BoundaryManager.DefaultJapanese = false;
-BoundaryManager.DefaultSpecialCharactors = "\"'`()[]{}";
+BoundaryManager.DefaultAlwaysCenter = false;
+BoundaryManager.DefaultJumpToCenter = false;
+BoundaryManager.DefaultSpecialCharacters = "\"'`()[]{}";
 BoundaryManager.DefaultMargin = "0ex 0.3ex 0ex 0.7ex";
 
 exports.DocumentBoundary = DocumentBoundary;

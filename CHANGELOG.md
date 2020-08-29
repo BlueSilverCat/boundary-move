@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.3.0] 2020/08/29
+
+### [Added]
+
+- Add alwaysCenter.
+- Add jumpToCenter.
+
 ## [0.2.4] 2020/08/23
 
 ### [Fixed]
@@ -54,7 +61,7 @@
 
 ### [Changed]
 
-- Chnage JumpMarker style
+- Change JumpMarker style
 - Add target file scheme
 
 ### [Fixed]

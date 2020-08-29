@@ -152,8 +152,8 @@ class RadixConverter {
   constructor(char = "a", radix = 26) {
     this.char = char;
     this.radix = radix;
-    this.NtStable = {};
-    this.StNtable = {};
+    this.ntsTable = {};
+    this.stnTable = {};
   }
 
   /**
@@ -161,11 +161,11 @@ class RadixConverter {
    * @returns {string}
    */
   convertToString(n) {
-    if (this.NtStable.hasOwnProperty(n) === true) {
-      return this.NtStable[n];
+    if (this.ntsTable.hasOwnProperty(n) === true) {
+      return this.ntsTable[n];
     }
     const result = convertToString(n, this.char, this.radix);
-    this.NtStable[n] = result;
+    this.ntsTable[n] = result;
     return result;
   }
 
@@ -174,11 +174,11 @@ class RadixConverter {
    * @returns {number}
    */
   convertToNumber(str) {
-    if (this.StNtable.hasOwnProperty(str) === true) {
-      return this.StNtable[str];
+    if (this.stnTable.hasOwnProperty(str) === true) {
+      return this.stnTable[str];
     }
     const result = convertToNumber(str, this.char, this.radix);
-    this.StNtable[str] = result;
+    this.stnTable[str] = result;
     return result;
   }
 }
@@ -348,7 +348,7 @@ function arrayReplace2d(array, startRow, startColumn, endRow, endColumn, data, i
  * @return {string[]}
  */
 
-function splitIncludeSepatator(string, separator = "\n") {
+function splitIncludeSeparator(string, separator = "\n") {
   const result = [];
   let work = string;
   let index = string.indexOf(separator);
@@ -483,42 +483,70 @@ function moveSelections(editor, positions) {
 }
 
 /**
+ * need fix
  * @param { import("vscode").TextEditor } editor
  */
-async function revealCursor(editor) {
-  //need fix
+async function revealCursor(editor, center = false) {
+  let atUp = "top";
+  let atDown = "bottom";
+  if (center === true) {
+    atUp = "center";
+    atDown = "center";
+  }
+
   const line = editor.selection.active.line;
-  // const character = editor.selection.active.character;
-  let diff = 0;
   for (let i = 0; i < 1; ++i) {
-    diff = editor.visibleRanges[i].start.line - line;
-    if (diff > 0 && editor.visibleRanges[i].start.line > 0) {
-      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "top" });
+    if (line < editor.visibleRanges[i].start.line && editor.visibleRanges[i].start.line > 0) {
+      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: atUp });
+    } else if (
+      line > editor.visibleRanges[i].end.line &&
+      editor.visibleRanges[i].end.line < editor.document.lineCount
+    ) {
+      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: atDown });
     }
-    diff = line - editor.visibleRanges[i].end.line + 1;
-    if (diff > 0 && editor.visibleRanges[i].end.line < editor.document.lineCount - 1) {
-      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "bottom" });
-    }
-    // need fix. need horizontal scroll api
-    if (line !== editor.visibleRanges[i].end.line) {
-      await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
+    if (line < editor.visibleRanges[i].end.line) {
+      await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" }); //実際に見えている範囲より-1された範囲がvisibleRangeとして認識される
     }
   }
 }
 
-// vissibleRangesが複数の場合は、どんな時?
-// editor.vissibleRanges.lengthが取れないのはなぜ?
-// editor.vissibleRanges readonly
+// async function ff(editor) {
+//   const line = editor.selection.active.line;
+//   if (line < editor.visibleRanges[0].end.line) {
+//     await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" }); //実際に見えている範囲より-1された範囲がvisibleRangeとして認識される
+//   }
+//   // } else {
+//   //   const character = editor.selection.active.character;
+//   //   if (character === editor.document.lineAt(editor.selection.active.line).range.end.character) {
+//   //     await vscode.commands.executeCommand("cursorLineEnd");
+//   //   } else if (character === 0) {
+//   //     await vscode.commands.executeCommand("cursorLineStart");
+//   //   } else {
+//   //     await vscode.commands.executeCommand("cursorMove", { to: "left" });
+//   //     await vscode.commands.executeCommand("cursorMove", { to: "right" });
+//   //   }
+//   // }
+// }
+
+async function cursorToCenter(editor) {
+  // const position = new vscode.Range(editor.selection.active, editor.selection.active);
+  // editor.revealRange(position, vscode.TextEditorRevealType.InCenter);
+  vscode.commands.executeCommand("revealLine", { lineNumber: editor.selection.active.line, at: "center" });
+}
+
+// visibleRangesが複数の場合は、どんな時?
+// editor.visibleRanges.lengthが取れないのはなぜ?
+// editor.visibleRanges readonly
 // editor.revealRange()は、タイムラグがある割がawaitが使えないので使い勝手が悪い
 // async function revealCursor(editor, type = 0) {
 //   //need fix
 //   const line = editor.selection.active.line;
 //   // const character = editor.selection.active.character;
 //   for (let i = 0; i < 1; ++i) {
-//     if (line > editor.visibleRanges[i].start.line && line < editor.visibleRanges[i].end.line) {
-//       await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
-//       continue;
-//     }
+//     // if (line > editor.visibleRanges[i].start.line && line < editor.visibleRanges[i].end.line) {
+//     //   await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
+//     //   continue;
+//     // }
 
 //     let diff = 0;
 //     diff = editor.visibleRanges[i].start.line - line + 1;
@@ -769,8 +797,8 @@ function getTextDocumentChangeEventInfo(event, separator = "\n") {
     result += `range: \n${getRangeInfo(contentChange.range)}${separator}`;
     result += `rangeLength: ${contentChange.rangeLength}${separator}`;
     result += `rangeOffset: ${contentChange.rangeOffset}${separator}`;
-    result += `psitionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
-    result += `psitionAt: ${getPositionInfo(
+    result += `positionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
+    result += `positionAt: ${getPositionInfo(
       event.document.positionAt(contentChange.rangeOffset + contentChange.rangeLength),
       ", "
     )}${separator}`;
@@ -825,9 +853,10 @@ exports.limitShift = limitShift;
 exports.slice2d = slice2d;
 // exports.concat2d = concat2d;
 exports.arrayReplace2d = arrayReplace2d;
-exports.splitIncludeSepatator = splitIncludeSepatator;
+exports.splitIncludeSeparator = splitIncludeSeparator;
 
 exports.revealCursor = revealCursor;
+exports.cursorToCenter = cursorToCenter;
 exports.registerCommand = registerCommand;
 exports.getTextDocument = getTextDocument;
 exports.uriToString = uriToString;
