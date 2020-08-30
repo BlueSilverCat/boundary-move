@@ -347,7 +347,6 @@ function arrayReplace2d(array, startRow, startColumn, endRow, endColumn, data, i
  * @param {string} separator
  * @return {string[]}
  */
-
 function splitIncludeSeparator(string, separator = "\n") {
   const result = [];
   let work = string;
@@ -372,7 +371,6 @@ function splitIncludeSeparator(string, separator = "\n") {
  * @param {number} endColumn
  * @return {any[][]}
  */
-
 function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) {
   const result = [];
   let start = 0;

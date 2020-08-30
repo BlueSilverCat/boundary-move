@@ -18,7 +18,9 @@ function activate(context) {
   vscodeUtil.registerCommand(context, "BM.selectRight", selectRight);
   vscodeUtil.registerCommand(context, "BM.info", info);
   vscodeUtil.registerCommand(context, "BM.jump", jump);
+  vscodeUtil.registerCommand(context, "BM.selectionJump", selectionJump);
   vscodeUtil.registerCommand(context, "BM.jumpLine", jumpLine);
+  vscodeUtil.registerCommand(context, "BM.selectionJumpLine", selectionJumpLine);
 
   vscode.workspace.onDidChangeConfiguration(
     (event) => {
@@ -38,6 +40,7 @@ function activate(context) {
     null,
     context.subscriptions
   );
+
   vscode.workspace.onDidCloseTextDocument(
     (document) => {
       bm.delete(document);
@@ -45,6 +48,7 @@ function activate(context) {
     null,
     context.subscriptions
   );
+
   vscode.workspace.onDidChangeTextDocument(
     (event) => {
       bm.change(event);
@@ -97,12 +101,28 @@ function activate(context) {
     bm.jump(editor);
   }
 
+  function selectionJump() {
+    const editor = vscode.window.activeTextEditor;
+    if (vscodeUtil.isEmpty(editor) === true) {
+      return;
+    }
+    bm.jump(editor, true);
+  }
+
   function jumpLine() {
     const editor = vscode.window.activeTextEditor;
     if (vscodeUtil.isEmpty(editor) === true) {
       return;
     }
     bm.jumpLine(editor);
+  }
+
+  function selectionJumpLine() {
+    const editor = vscode.window.activeTextEditor;
+    if (vscodeUtil.isEmpty(editor) === true) {
+      return;
+    }
+    bm.jumpLine(editor, true);
   }
 }
 exports.activate = activate;

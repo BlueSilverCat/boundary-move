@@ -324,6 +324,20 @@ class DocumentBoundary {
   }
 
   /**
+   * @param {vscode.TextEditor} editor
+   * @param {number} lineIndex
+   * @param {number} count
+   */
+  selectionJump(editor, lineIndex, count) {
+    const boundary = this.lineBoundaries[lineIndex][count];
+    const positions = [{ line: lineIndex, character: boundary.start }];
+    vscodeUtil.moveSelections(editor, positions);
+    if (this.JumpToCenter === true) {
+      vscodeUtil.cursorToCenter(editor);
+    }
+  }
+
+  /**
    * @param {number} v
    * @param {number} t
    * @param {number} i
@@ -920,7 +934,7 @@ class BoundaryManager {
   /**
    * @param {vscode.TextEditor} editor
    */
-  async jump(editor) {
+  async jump(editor, selection = false) {
     if (this.JumpZoomOutLevel > 0) {
       await vscodeUtil.fontZoomOut(this.JumpZoomOutLevel);
     }
@@ -942,10 +956,14 @@ class BoundaryManager {
       return;
     }
 
-    this.documentBoundaries[documentIndex].jump(editor, result.lineIndex, result.count);
+    if (selection === false) {
+      this.documentBoundaries[documentIndex].jump(editor, result.lineIndex, result.count);
+    } else {
+      this.documentBoundaries[documentIndex].selectionJump(editor, result.lineIndex, result.count);
+    }
   }
 
-  async jumpLine(editor) {
+  async jumpLine(editor, selection = false) {
     const { documentIndex, lineCount } = this.getLineCount(editor);
     if (documentIndex === -1 || lineCount <= 0) {
       return;
@@ -972,7 +990,11 @@ class BoundaryManager {
       return;
     }
 
-    this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
+    if (selection === false) {
+      this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
+    } else {
+      this.documentBoundaries[documentIndex].selectionJump(editor, lineIndex, count);
+    }
   }
 
   /**
@@ -1112,6 +1134,7 @@ class BoundaryManager {
     }
     return null;
   }
+
   /**
    * @param {import("vscode").TextEditor} editor
    * @param {{range: import("vscode").Range, textContent: string, index: number}[][]} decorationRanges

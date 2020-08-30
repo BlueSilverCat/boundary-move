@@ -141,6 +141,14 @@
         "title": "BoundaryMove: jump line"
       },
       {
+        "command": "BM.selectionJump",
+        "title": "BoundaryMove: Selection Jump"
+      },
+      {
+        "command": "BM.selectionJumpLine",
+        "title": "BoundaryMove: Selection jump line"
+      },
+      {
         "command": "BM.moveLeft",
         "title": "BoundaryMove: Move Left"
       },
