@@ -1,9 +1,11 @@
 # Change Log
 
-## [0.3.0] 2020/08/29
+## [0.3.0] 2020/08/31
 
 ### [Added]
 
+- Add selectJump command.
+- Add selectJumpLine command.
 - Add alwaysCenter.
 - Add jumpToCenter.
 

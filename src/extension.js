@@ -18,9 +18,9 @@ function activate(context) {
   vscodeUtil.registerCommand(context, "BM.selectRight", selectRight);
   vscodeUtil.registerCommand(context, "BM.info", info);
   vscodeUtil.registerCommand(context, "BM.jump", jump);
-  vscodeUtil.registerCommand(context, "BM.selectionJump", selectionJump);
   vscodeUtil.registerCommand(context, "BM.jumpLine", jumpLine);
-  vscodeUtil.registerCommand(context, "BM.selectionJumpLine", selectionJumpLine);
+  vscodeUtil.registerCommand(context, "BM.selectJump", selectJump);
+  vscodeUtil.registerCommand(context, "BM.selectJumpLine", selectJumpLine);
 
   vscode.workspace.onDidChangeConfiguration(
     (event) => {
@@ -101,7 +101,7 @@ function activate(context) {
     bm.jump(editor);
   }
 
-  function selectionJump() {
+  function selectJump() {
     const editor = vscode.window.activeTextEditor;
     if (vscodeUtil.isEmpty(editor) === true) {
       return;
@@ -117,7 +117,7 @@ function activate(context) {
     bm.jumpLine(editor);
   }
 
-  function selectionJumpLine() {
+  function selectJumpLine() {
     const editor = vscode.window.activeTextEditor;
     if (vscodeUtil.isEmpty(editor) === true) {
       return;

@@ -436,20 +436,21 @@ function getSelection(editor, index, position) {
  * @param { import("vscode").TextEditor } editor
  * @param {{ line:number, character:number }[]} positions
  */
-function moveCursors(editor, positions) {
+async function moveCursors(editor, positions) {
   let selections = [];
   for (let i = 0; i < positions.length; ++i) {
     selections.push(getSelection(editor, i, positions[i]));
   }
   editor.selections = selections;
-  revealCursor(editor);
+  await revealLine(editor);
+  await revealCursor(editor);
 }
 
 /**
  * @param { import("vscode").TextEditor } editor
  * @param {{ line:number, character:number }[]} positions
  */
-function moveSelections(editor, positions) {
+async function moveSelections(editor, positions) {
   let line = 0;
   let character = 0;
   let active = null;
@@ -462,14 +463,15 @@ function moveSelections(editor, positions) {
     selections.push(new vscode.Selection(anchor, active));
   }
   editor.selections = selections;
-  revealCursor(editor);
+  await revealLine(editor);
+  await revealCursor(editor); // need fix これによって選択範囲が途切れる事がある
+  editor.selections = selections; // 応急処置
 }
 
 /**
- * need fix
  * @param { import("vscode").TextEditor } editor
  */
-async function revealCursor(editor, center = false) {
+async function revealLine(editor, center = false) {
   let atUp = "top";
   let atDown = "bottom";
   if (center === true) {
@@ -487,14 +489,23 @@ async function revealCursor(editor, center = false) {
     ) {
       await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: atDown });
     }
-    if (line < editor.visibleRanges[i].end.line) {
-      await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" }); //実際に見えている範囲より-1された範囲がvisibleRangeとして認識される
-    }
+  }
+}
+
+/**
+ * need fix
+ * @param {*} editor
+ * selectionが切れてしまうのはこいつが原因
+ */
+async function revealCursor(editor) {
+  const line = editor.selection.active.line;
+  if (line < editor.visibleRanges[0].end.line) {
+    await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" }); //実際に見えている範囲より-1された範囲がvisibleRangeとして認識される
   }
 }
 
 async function cursorToCenter(editor) {
-  vscode.commands.executeCommand("revealLine", { lineNumber: editor.selection.active.line, at: "center" });
+  await vscode.commands.executeCommand("revealLine", { lineNumber: editor.selection.active.line, at: "center" });
 }
 
 /**
@@ -738,10 +749,28 @@ function getRangeInfo(range, separator = "\n") {
   return result;
 }
 
-function getPositionInfo(position, separator = "\n") {
+function getPositionInfo(position, separator = "\n", label = true) {
   let result = "";
-  result += `line: ${position.line}${separator}`;
-  result += `character: ${position.character}`;
+  let lineLabel = "line: ";
+  let characterLabel = "character: ";
+  if (label === false) {
+    lineLabel = "";
+    characterLabel = "";
+  }
+
+  result += `${lineLabel}${position.line}${separator}`;
+  result += `${characterLabel}${position.character}`;
+  return result;
+}
+
+function getSelectionsInfo(selections, sep = "\n") {
+  let result = "";
+  for (const selection of selections) {
+    result += `selection.start: ${getPositionInfo(selection.start, ", ", false)} -- `;
+    result += `selection.end:  ${getPositionInfo(selection.end, ", ", false)}${sep}`;
+    result += `selection.anchor:  ${getPositionInfo(selection.anchor, ", ", false)} -- `;
+    result += `selection.active:  ${getPositionInfo(selection.active, ", ", false)}`;
+  }
   return result;
 }
 
@@ -771,7 +800,7 @@ exports.arrayReplace = arrayReplace;
 exports.limitPop = limitPop;
 exports.limitShift = limitShift;
 exports.slice2d = slice2d;
-// exports.concat2d = concat2d;
+
 exports.arrayReplace2d = arrayReplace2d;
 exports.splitIncludeSeparator = splitIncludeSeparator;
 
@@ -799,3 +828,4 @@ exports.getEol = getEol;
 // exports.getEditorInfo = getEditorInfo;
 // exports.getRangeInfo = getRangeInfo;
 exports.getTextDocumentChangeEventInfo = getTextDocumentChangeEventInfo;
+exports.getSelectionsInfo = getSelectionsInfo;

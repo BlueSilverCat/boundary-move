@@ -15,6 +15,7 @@ This extension sets stop positions in more detail.
     Input destination directly.
   - `jump line`  
     Input lineNumber then input destination.
+- selectJump: Select from current position to the specified position.
 
 ### Stop position
 
@@ -121,7 +122,9 @@ Then stop positions are as below.
 | BM.selectRight    | shift + right        | Select from current position to the right boundary. |
 | BM.jump           |                      | Jump the cursor to specified position.              |
 | BM.jumpLine       |                      | Jump the cursor to specified position.              |
-| BM.info           |                      | Output debug infomation to the OutputChannel.       |
+| BM.selectJump     |                      | Select from current position to specified position. |
+| BM.selectJumpLine |                      | Select from current position to specified position. |
+| BM.info           |                      | Output debug information to the OutputChannel.      |
 | cursorLeft        | ctrl + left          | Move cursors to left.                               |
 | cursorRight       | ctrl + right         | Move cursors to right.                              |
 | cursorLeftSelect  | ctrl + shift + left  | Select from current position to left.               |
@@ -141,11 +144,17 @@ Then stop positions are as below.
   // This characters always detect as boundary.
   "boundary-move.specialCharacters": "\"'`()[]{}",
 
-  // Improve Japanse boundary.
+  // Improve Japanese boundary.
   "boundary-move.japanese": false,
 
   // Zoom out before jump. 0 is no zoom out.
-  "boundaryMove.jumpZoomOutLevel": 1
+  "boundaryMove.jumpZoomOutLevel": 1,
+
+  // Center cursor after move.
+  "boundaryMove.alwaysCenter": false
+
+  // Center cursor after jump.
+  "boundaryMove.jumpToCenter": false
 ```
 
 ## Marker Color

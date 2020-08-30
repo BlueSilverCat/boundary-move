@@ -149,7 +149,6 @@ class DocumentBoundary {
   static capitalLetter(boundaries) {
     for (let i = 0, len = boundaries.length - 1; i < len; ++i) {
       if (boundaries[i].shortValue === "Lu" && boundaries[i].length === 1 && boundaries[i + 1].shortValue === "Ll") {
-        //string: boundary[i].string + boundary[i + 1].string,
         boundaries[i] = DocumentBoundary.getBoundary(
           "CCL",
           boundaries[i].start,
@@ -269,40 +268,40 @@ class DocumentBoundary {
   /**
    * @param {vscode.TextEditor} editor
    */
-  moveLeft(editor) {
-    vscodeUtil.moveCursors(editor, this.getPositionsLeft(editor));
+  async moveLeft(editor) {
+    await vscodeUtil.moveCursors(editor, this.getPositionsLeft(editor));
     if (this.AlwaysCenter === true) {
-      vscodeUtil.cursorToCenter(editor);
+      await vscodeUtil.cursorToCenter(editor);
     }
   }
 
   /**
    * @param {vscode.TextEditor} editor
    */
-  moveRight(editor) {
-    vscodeUtil.moveCursors(editor, this.getPositionsRight(editor));
+  async moveRight(editor) {
+    await vscodeUtil.moveCursors(editor, this.getPositionsRight(editor));
     if (this.AlwaysCenter === true) {
-      vscodeUtil.cursorToCenter(editor);
+      await vscodeUtil.cursorToCenter(editor);
     }
   }
 
   /**
    * @param {vscode.TextEditor} editor
    */
-  selectLeft(editor) {
-    vscodeUtil.moveSelections(editor, this.getPositionsLeft(editor));
+  async selectLeft(editor) {
+    await vscodeUtil.moveSelections(editor, this.getPositionsLeft(editor));
     if (this.AlwaysCenter === true) {
-      vscodeUtil.cursorToCenter(editor);
+      await vscodeUtil.cursorToCenter(editor);
     }
   }
 
   /**
    * @param {vscode.TextEditor} editor
    */
-  selectRight(editor) {
-    vscodeUtil.moveSelections(editor, this.getPositionsRight(editor));
+  async selectRight(editor) {
+    await vscodeUtil.moveSelections(editor, this.getPositionsRight(editor));
     if (this.AlwaysCenter === true) {
-      vscodeUtil.cursorToCenter(editor);
+      await vscodeUtil.cursorToCenter(editor);
     }
   }
 
@@ -311,15 +310,12 @@ class DocumentBoundary {
    * @param {number} lineIndex
    * @param {number} count
    */
-  jump(editor, lineIndex, count) {
-    // if (lineIndex >= this.lineBoundaries.length || count >= this.lineBoundaries[lineIndex].length) {
-    //   return;
-    // }
+  async jump(editor, lineIndex, count) {
     const boundary = this.lineBoundaries[lineIndex][count];
     const positions = [{ line: lineIndex, character: boundary.start }];
-    vscodeUtil.moveCursors(editor, positions);
+    await vscodeUtil.moveCursors(editor, positions);
     if (this.JumpToCenter === true) {
-      vscodeUtil.cursorToCenter(editor);
+      await vscodeUtil.cursorToCenter(editor);
     }
   }
 
@@ -328,12 +324,12 @@ class DocumentBoundary {
    * @param {number} lineIndex
    * @param {number} count
    */
-  selectionJump(editor, lineIndex, count) {
+  async selectJump(editor, lineIndex, count) {
     const boundary = this.lineBoundaries[lineIndex][count];
     const positions = [{ line: lineIndex, character: boundary.start }];
-    vscodeUtil.moveSelections(editor, positions);
+    await vscodeUtil.moveSelections(editor, positions);
     if (this.JumpToCenter === true) {
-      vscodeUtil.cursorToCenter(editor);
+      await vscodeUtil.cursorToCenter(editor);
     }
   }
 
@@ -957,9 +953,9 @@ class BoundaryManager {
     }
 
     if (selection === false) {
-      this.documentBoundaries[documentIndex].jump(editor, result.lineIndex, result.count);
+      await this.documentBoundaries[documentIndex].jump(editor, result.lineIndex, result.count);
     } else {
-      this.documentBoundaries[documentIndex].selectionJump(editor, result.lineIndex, result.count);
+      await this.documentBoundaries[documentIndex].selectJump(editor, result.lineIndex, result.count);
     }
   }
 
@@ -991,9 +987,9 @@ class BoundaryManager {
     }
 
     if (selection === false) {
-      this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
+      await this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
     } else {
-      this.documentBoundaries[documentIndex].selectionJump(editor, lineIndex, count);
+      await this.documentBoundaries[documentIndex].selectJump(editor, lineIndex, count);
     }
   }
 
@@ -1044,7 +1040,7 @@ class BoundaryManager {
     for (let i = 0, len = lineBoundaries.length; i < len; ++i) {
       if (lineBoundaries[i].shortValue === "Zs") {
         continue;
-      }
+      } // 長さが1のものを候補から外すなど
       lineDecorationRanges.push({
         range: new vscode.Range(
           lineIndex,

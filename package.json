@@ -55,7 +55,7 @@
         "boundaryMove.markerMargin": {
           "type": "string",
           "default": "0ex 0.3ex 0ex 0.7ex",
-          "description": "Marker magin."
+          "description": "Marker margin."
         },
         "boundaryMove.capitalLetter": {
           "type": "boolean",
@@ -80,7 +80,7 @@
         "boundaryMove.alwaysCenter": {
           "type": "boolean",
           "default": false,
-          "description": "Center cursor always."
+          "description": "Center cursor after move."
         },
         "boundaryMove.jumpToCenter": {
           "type": "boolean",
@@ -141,11 +141,11 @@
         "title": "BoundaryMove: jump line"
       },
       {
-        "command": "BM.selectionJump",
+        "command": "BM.selectJump",
         "title": "BoundaryMove: Selection Jump"
       },
       {
-        "command": "BM.selectionJumpLine",
+        "command": "BM.selectJumpLine",
         "title": "BoundaryMove: Selection jump line"
       },
       {
