@@ -4,7 +4,7 @@ const vscodeUtil = require("./vscodeUtil.js");
 class DocumentBoundary {
   /**
    * @param {vscode.TextDocument} document
-   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean }} config
+   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, AlwaysCenter: boolean, JumpToCenter: boolean }} config
    */
   constructor(document, config) {
     this.uri = document.uri;
@@ -53,12 +53,14 @@ class DocumentBoundary {
   }
 
   /**
-   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean }} config
+   * @param {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, AlwaysCenter: boolean, JumpToCenter: boolean }} config
    */
   setConfig(config) {
     this.SpecialRegex = DocumentBoundary.compile(config.SpecialCharacters);
     this.CapitalLetter = config.CapitalLetter;
     this.Japanese = config.Japanese;
+    this.AlwaysCenter = config.AlwaysCenter;
+    this.JumpToCenter = config.JumpToCenter;
   }
 
   /**
@@ -147,7 +149,6 @@ class DocumentBoundary {
   static capitalLetter(boundaries) {
     for (let i = 0, len = boundaries.length - 1; i < len; ++i) {
       if (boundaries[i].shortValue === "Lu" && boundaries[i].length === 1 && boundaries[i + 1].shortValue === "Ll") {
-        //string: boundary[i].string + boundary[i + 1].string,
         boundaries[i] = DocumentBoundary.getBoundary(
           "CCL",
           boundaries[i].start,
@@ -267,29 +268,41 @@ class DocumentBoundary {
   /**
    * @param {vscode.TextEditor} editor
    */
-  moveLeft(editor) {
-    vscodeUtil.moveCursors(editor, this.getPositionsLeft(editor));
+  async moveLeft(editor) {
+    await vscodeUtil.moveCursors(editor, this.getPositionsLeft(editor));
+    if (this.AlwaysCenter === true) {
+      await vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
    * @param {vscode.TextEditor} editor
    */
-  moveRight(editor) {
-    vscodeUtil.moveCursors(editor, this.getPositionsRight(editor));
+  async moveRight(editor) {
+    await vscodeUtil.moveCursors(editor, this.getPositionsRight(editor));
+    if (this.AlwaysCenter === true) {
+      await vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
    * @param {vscode.TextEditor} editor
    */
-  selectLeft(editor) {
-    vscodeUtil.moveSelections(editor, this.getPositionsLeft(editor));
+  async selectLeft(editor) {
+    await vscodeUtil.moveSelections(editor, this.getPositionsLeft(editor));
+    if (this.AlwaysCenter === true) {
+      await vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
    * @param {vscode.TextEditor} editor
    */
-  selectRight(editor) {
-    vscodeUtil.moveSelections(editor, this.getPositionsRight(editor));
+  async selectRight(editor) {
+    await vscodeUtil.moveSelections(editor, this.getPositionsRight(editor));
+    if (this.AlwaysCenter === true) {
+      await vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -297,13 +310,27 @@ class DocumentBoundary {
    * @param {number} lineIndex
    * @param {number} count
    */
-  jump(editor, lineIndex, count) {
-    // if (lineIndex >= this.lineBoundaries.length || count >= this.lineBoundaries[lineIndex].length) {
-    //   return;
-    // }
+  async jump(editor, lineIndex, count) {
     const boundary = this.lineBoundaries[lineIndex][count];
     const positions = [{ line: lineIndex, character: boundary.start }];
-    vscodeUtil.moveCursors(editor, positions);
+    await vscodeUtil.moveCursors(editor, positions);
+    if (this.JumpToCenter === true) {
+      await vscodeUtil.cursorToCenter(editor);
+    }
+  }
+
+  /**
+   * @param {vscode.TextEditor} editor
+   * @param {number} lineIndex
+   * @param {number} count
+   */
+  async selectJump(editor, lineIndex, count) {
+    const boundary = this.lineBoundaries[lineIndex][count];
+    const positions = [{ line: lineIndex, character: boundary.start }];
+    await vscodeUtil.moveSelections(editor, positions);
+    if (this.JumpToCenter === true) {
+      await vscodeUtil.cursorToCenter(editor);
+    }
   }
 
   /**
@@ -552,7 +579,10 @@ class DocumentBoundary {
     let tail = null;
     if (result.length !== 0) {
       tail = result[result.length - 1];
-      if (tail.shortValue === data[0].shortValue && tail.shortValue !== "SPC" || (tail.shortValue === "CCL" && data[0].shortValue === "Ll")) {
+      if (
+        (tail.shortValue === data[0].shortValue && tail.shortValue !== "SPC") ||
+        (tail.shortValue === "CCL" && data[0].shortValue === "Ll")
+      ) {
         tail.length += data[0].length;
         data.shift();
       } else if (capitalLetter === true && tail.shortValue === "Lu" && data[0].shortValue === "Ll") {
@@ -613,7 +643,7 @@ class DocumentBoundary {
       return result;
     }
     boundaries2[0] = DocumentBoundary.check(boundaries2[0]);
-    result = vscodeUtil.concat2d(result, boundaries2);
+    result = result.concat(boundaries2);
     return result;
   }
 }
@@ -686,9 +716,12 @@ class BoundaryManager {
    * @param {vscode.WorkspaceConfiguration} config
    */
   setConfig(config) {
-    this.SpecialCharacters = config.get("specialCharacters", BoundaryManager.DefaultSpecialCharactors);
+    this.SpecialCharacters = config.get("specialCharacters", BoundaryManager.DefaultSpecialCharacters);
     this.CapitalLetter = config.get("capitalLetter", BoundaryManager.DefaultCapitalLetter);
     this.Japanese = config.get("japanese", BoundaryManager.DefaultJapanese);
+    this.JumpZoomOutLevel = config.get("jumpZoomOutLevel", BoundaryManager.DefaultJumpZoomOutLevel);
+    this.AlwaysCenter = config.get("alwaysCenter", BoundaryManager.DefaultAlwaysCenter);
+    this.JumpToCenter = config.get("jumpToCenter", BoundaryManager.DefaultJumpToCenter);
     const margin = config.get("markerMargin", BoundaryManager.DefaultMargin);
     if (vscodeUtil.isValidMargin(margin) === false) {
       this.MarkerMargin = BoundaryManager.DefaultMargin;
@@ -698,14 +731,17 @@ class BoundaryManager {
   }
 
   /**
-   * @return {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, MarkerMargin: string }}
+   * @return {{ SpecialCharacters: string, CapitalLetter: boolean, Japanese: boolean, JumpZoomOutLevel: number, MarkerMargin: string, AlwaysCenter: boolean, JumpToCenter: boolean }}
    */
   getConfig() {
     return {
       SpecialCharacters: this.SpecialCharacters,
       CapitalLetter: this.CapitalLetter,
       Japanese: this.Japanese,
+      JumpZoomOutLevel: this.JumpZoomOutLevel,
       MarkerMargin: this.MarkerMargin,
+      AlwaysCenter: this.AlwaysCenter,
+      JumpToCenter: this.JumpToCenter,
     };
   }
 
@@ -893,12 +929,68 @@ class BoundaryManager {
 
   /**
    * @param {vscode.TextEditor} editor
-   * @param {number} documentIndex
-   * @param {number} lineIndex
-   * @param {number} count
    */
-  jump(editor, documentIndex, lineIndex, count) {
-    this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
+  async jump(editor, selection = false) {
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomOut(this.JumpZoomOutLevel);
+    }
+    const { documentIndex, start, end } = this.getVisibleRange(editor);
+    if (documentIndex === -1 || end - start <= 0) {
+      if (this.JumpZoomOutLevel > 0) {
+        await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+      }
+      return;
+    }
+    const decorationRanges = this.getDecorationRanges(documentIndex, start, end);
+    const decorationTypes = this.setDecorations(editor, decorationRanges);
+    const result = await this.showBoundaryInputRange(decorationRanges);
+    decorationTypes.dispose();
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+    }
+    if (result === null) {
+      return;
+    }
+
+    if (selection === false) {
+      await this.documentBoundaries[documentIndex].jump(editor, result.lineIndex, result.count);
+    } else {
+      await this.documentBoundaries[documentIndex].selectJump(editor, result.lineIndex, result.count);
+    }
+  }
+
+  async jumpLine(editor, selection = false) {
+    const { documentIndex, lineCount } = this.getLineCount(editor);
+    if (documentIndex === -1 || lineCount <= 0) {
+      return;
+    }
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomOut(this.JumpZoomOutLevel);
+    }
+    const lineIndex = await BoundaryManager.showLineInput(lineCount, editor.selection.active.line);
+    if (lineIndex === -1) {
+      if (this.JumpZoomOutLevel > 0) {
+        await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+      }
+      return;
+    }
+
+    const lineDecorationRanges = this.getLineDecorationRanges(documentIndex, lineIndex);
+    const decorationTypes = this.setDecorations(editor, [lineDecorationRanges]);
+    const count = await this.showBoundaryInput(lineDecorationRanges);
+    decorationTypes.dispose();
+    if (this.JumpZoomOutLevel > 0) {
+      await vscodeUtil.fontZoomIn(this.JumpZoomOutLevel);
+    }
+    if (count === -1) {
+      return;
+    }
+
+    if (selection === false) {
+      await this.documentBoundaries[documentIndex].jump(editor, lineIndex, count);
+    } else {
+      await this.documentBoundaries[documentIndex].selectJump(editor, lineIndex, count);
+    }
   }
 
   /**
@@ -948,7 +1040,7 @@ class BoundaryManager {
     for (let i = 0, len = lineBoundaries.length; i < len; ++i) {
       if (lineBoundaries[i].shortValue === "Zs") {
         continue;
-      }
+      } // 長さが1のものを候補から外すなど
       lineDecorationRanges.push({
         range: new vscode.Range(
           lineIndex,
@@ -1039,6 +1131,98 @@ class BoundaryManager {
     return null;
   }
 
+  /**
+   * @param {import("vscode").TextEditor} editor
+   * @param {{range: import("vscode").Range, textContent: string, index: number}[][]} decorationRanges
+   */
+  setDecorations(editor, decorationRanges) {
+    const decorationType = vscode.window.createTextEditorDecorationType({});
+    const options = [];
+    for (const lineDecorationRanges of decorationRanges) {
+      for (const option of lineDecorationRanges) {
+        options.push({
+          range: option.range,
+          renderOptions: {
+            before: {
+              contentText: option.textContent,
+              margin: this.MarkerMargin,
+              fontStyle: "normal",
+              fontWeight: "normal",
+              color: { id: "boundaryMove.markerColor" },
+              backgroundColor: { id: "boundaryMove.markerBackgroundColor" },
+            },
+          },
+        });
+      }
+    }
+    editor.setDecorations(decorationType, options);
+    return decorationType;
+  }
+
+  /**
+   * @param {number} lineCount
+   */
+  static async showLineInput(lineCount, currentLine) {
+    const rangeString = `range: 1 -- ${lineCount}`;
+    const line = (currentLine + 1).toString(10);
+    const result = await vscode.window.showInputBox({
+      placeHolder: rangeString,
+      prompt: `Input line index for jump. ${rangeString}`,
+      value: line,
+      valueSelection: [0, line.length],
+    });
+    if (vscodeUtil.isEmpty(result) === true) {
+      return -1;
+    }
+    let lineIndex = parseInt(result, 10) - 1;
+    if (lineIndex < 0) {
+      lineIndex = 0;
+    } else if (lineIndex >= lineCount) {
+      lineIndex = lineCount - 1;
+    }
+    return lineIndex;
+  }
+
+  /**
+   * @param {{range: import("vscode").Range, textContent: string, index: number}[]} lineDecorationRanges
+   */
+  async showBoundaryInput(lineDecorationRanges) {
+    const rangeString = `range: a -- ${this.converter.convertToString(lineDecorationRanges.length - 1)}`;
+    const result = await vscode.window.showInputBox({
+      placeHolder: rangeString,
+      prompt: `Input boundary index for jump. ${rangeString}`,
+      value: "a",
+    });
+    if (vscodeUtil.isEmpty(result) === true) {
+      return -1;
+    }
+    let i = this.converter.convertToNumber(result);
+    let count = 0;
+    if (i < 0) {
+      count = lineDecorationRanges[0].index;
+    } else if (i >= lineDecorationRanges.length) {
+      count = lineDecorationRanges[lineDecorationRanges.length - 1].index;
+    } else {
+      count = lineDecorationRanges[i].index;
+    }
+    return count;
+  }
+
+  async showBoundaryInputRange(decorationRanges) {
+    const rangeString = `range: aa -- ${
+      decorationRanges[decorationRanges.length - 1][decorationRanges[decorationRanges.length - 1].length - 1]
+        .textContent
+    }`;
+    const input = await vscode.window.showInputBox({
+      placeHolder: rangeString,
+      prompt: `Input boundary index for jump. ${rangeString}`,
+    });
+    if (vscodeUtil.isEmpty(input) === true) {
+      return null;
+    }
+    return this.search(decorationRanges, input);
+  }
+
   info() {
     this.channel.appendLine(`Documents: ${this.documentBoundaries.length}`);
     let result = "";
@@ -1069,7 +1253,10 @@ BoundaryManager.ScanEndMessage = "Boundary Move Scan End.";
 BoundaryManager.MessageTimeout = 3000;
 BoundaryManager.DefaultCapitalLetter = true;
 BoundaryManager.DefaultJapanese = false;
-BoundaryManager.DefaultSpecialCharactors = "\"'`()[]{}";
+BoundaryManager.DefaultJumpZoomOutLevel = 1;
+BoundaryManager.DefaultAlwaysCenter = false;
+BoundaryManager.DefaultJumpToCenter = false;
+BoundaryManager.DefaultSpecialCharacters = "\"'`()[]{}";
 BoundaryManager.DefaultMargin = "0ex 0.3ex 0ex 0.7ex";
 
 exports.DocumentBoundary = DocumentBoundary;

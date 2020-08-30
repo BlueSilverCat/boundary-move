@@ -4,7 +4,7 @@
   "description": "move and jump cursors to boundary.",
   "publisher": "BlueSilverCat",
   "license": "MIT",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "engines": {
     "vscode": "^1.47.0"
   },
@@ -55,7 +55,7 @@
         "boundaryMove.markerMargin": {
           "type": "string",
           "default": "0ex 0.3ex 0ex 0.7ex",
-          "description": "Marker magin."
+          "description": "Marker margin."
         },
         "boundaryMove.capitalLetter": {
           "type": "boolean",
@@ -76,6 +76,16 @@
           "type": "number",
           "default": 1,
           "description": "Zoom out before jump. 0 is no Zoom out."
+        },
+        "boundaryMove.alwaysCenter": {
+          "type": "boolean",
+          "default": false,
+          "description": "Center cursor after move."
+        },
+        "boundaryMove.jumpToCenter": {
+          "type": "boolean",
+          "default": false,
+          "description": "Center cursor after jump."
         }
       }
     },
@@ -129,6 +139,14 @@
       {
         "command": "BM.jumpLine",
         "title": "BoundaryMove: jump line"
+      },
+      {
+        "command": "BM.selectJump",
+        "title": "BoundaryMove: Selection Jump"
+      },
+      {
+        "command": "BM.selectJumpLine",
+        "title": "BoundaryMove: Selection jump line"
       },
       {
         "command": "BM.moveLeft",

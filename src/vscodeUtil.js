@@ -152,8 +152,8 @@ class RadixConverter {
   constructor(char = "a", radix = 26) {
     this.char = char;
     this.radix = radix;
-    this.NtStable = {};
-    this.StNtable = {};
+    this.ntsTable = {};
+    this.stnTable = {};
   }
 
   /**
@@ -161,11 +161,11 @@ class RadixConverter {
    * @returns {string}
    */
   convertToString(n) {
-    if (this.NtStable.hasOwnProperty(n) === true) {
-      return this.NtStable[n];
+    if (this.ntsTable.hasOwnProperty(n) === true) {
+      return this.ntsTable[n];
     }
     const result = convertToString(n, this.char, this.radix);
-    this.NtStable[n] = result;
+    this.ntsTable[n] = result;
     return result;
   }
 
@@ -174,11 +174,11 @@ class RadixConverter {
    * @returns {number}
    */
   convertToNumber(str) {
-    if (this.StNtable.hasOwnProperty(str) === true) {
-      return this.StNtable[str];
+    if (this.stnTable.hasOwnProperty(str) === true) {
+      return this.stnTable[str];
     }
     const result = convertToNumber(str, this.char, this.radix);
-    this.StNtable[str] = result;
+    this.stnTable[str] = result;
     return result;
   }
 }
@@ -347,8 +347,7 @@ function arrayReplace2d(array, startRow, startColumn, endRow, endColumn, data, i
  * @param {string} separator
  * @return {string[]}
  */
-
-function splitIncludeSepatator(string, separator = "\n") {
+function splitIncludeSeparator(string, separator = "\n") {
   const result = [];
   let work = string;
   let index = string.indexOf(separator);
@@ -372,7 +371,6 @@ function splitIncludeSepatator(string, separator = "\n") {
  * @param {number} endColumn
  * @return {any[][]}
  */
-
 function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) {
   const result = [];
   let start = 0;
@@ -400,21 +398,6 @@ function slice2d(array, startRow, startColumn, endRow = null, endColumn = null) 
   return result;
 }
 
-/**
- *
- * @param {any[][]} array1
- * @param {any[][]} array2
- */
-function concat2d(array1, array2) {
-  const result = [];
-  for (const e of array1) {
-    result.push(e);
-  }
-  for (const e of array2) {
-    result.push(e);
-  }
-  return result;
-}
 ////////////////////////////////////////////////////////////////////////////////
 // vscode
 ////////////////////////////////////////////////////////////////////////////////
@@ -453,20 +436,21 @@ function getSelection(editor, index, position) {
  * @param { import("vscode").TextEditor } editor
  * @param {{ line:number, character:number }[]} positions
  */
-function moveCursors(editor, positions) {
+async function moveCursors(editor, positions) {
   let selections = [];
   for (let i = 0; i < positions.length; ++i) {
     selections.push(getSelection(editor, i, positions[i]));
   }
   editor.selections = selections;
-  revealCursor(editor);
+  await revealLine(editor);
+  await revealCursor(editor);
 }
 
 /**
  * @param { import("vscode").TextEditor } editor
  * @param {{ line:number, character:number }[]} positions
  */
-function moveSelections(editor, positions) {
+async function moveSelections(editor, positions) {
   let line = 0;
   let character = 0;
   let active = null;
@@ -479,75 +463,50 @@ function moveSelections(editor, positions) {
     selections.push(new vscode.Selection(anchor, active));
   }
   editor.selections = selections;
-  revealCursor(editor);
+  await revealLine(editor);
+  await revealCursor(editor); // need fix これによって選択範囲が途切れる事がある
+  editor.selections = selections; // 応急処置
 }
 
 /**
  * @param { import("vscode").TextEditor } editor
  */
-async function revealCursor(editor) {
-  //need fix
+async function revealLine(editor, center = false) {
+  let atUp = "top";
+  let atDown = "bottom";
+  if (center === true) {
+    atUp = "center";
+    atDown = "center";
+  }
+
   const line = editor.selection.active.line;
-  // const character = editor.selection.active.character;
-  let diff = 0;
   for (let i = 0; i < 1; ++i) {
-    diff = editor.visibleRanges[i].start.line - line;
-    if (diff > 0 && editor.visibleRanges[i].start.line > 0) {
-      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "top" });
-    }
-    diff = line - editor.visibleRanges[i].end.line + 1;
-    if (diff > 0 && editor.visibleRanges[i].end.line < editor.document.lineCount - 1) {
-      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: "bottom" });
-    }
-    // need fix. need horizontal scroll api
-    if (line !== editor.visibleRanges[i].end.line) {
-      await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
+    if (line < editor.visibleRanges[i].start.line && editor.visibleRanges[i].start.line > 0) {
+      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: atUp });
+    } else if (
+      line > editor.visibleRanges[i].end.line &&
+      editor.visibleRanges[i].end.line < editor.document.lineCount
+    ) {
+      await vscode.commands.executeCommand("revealLine", { lineNumber: line, at: atDown });
     }
   }
 }
 
-// vissibleRangesが複数の場合は、どんな時?
-// editor.vissibleRanges.lengthが取れないのはなぜ?
-// editor.vissibleRanges readonly
-// editor.revealRange()は、タイムラグがある割がawaitが使えないので使い勝手が悪い
-// async function revealCursor(editor, type = 0) {
-//   //need fix
-//   const line = editor.selection.active.line;
-//   // const character = editor.selection.active.character;
-//   for (let i = 0; i < 1; ++i) {
-//     if (line > editor.visibleRanges[i].start.line && line < editor.visibleRanges[i].end.line) {
-//       await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" });
-//       continue;
-//     }
+/**
+ * need fix
+ * @param {*} editor
+ * selectionが切れてしまうのはこいつが原因
+ */
+async function revealCursor(editor) {
+  const line = editor.selection.active.line;
+  if (line < editor.visibleRanges[0].end.line) {
+    await vscode.commands.executeCommand("cursorMove", { to: "viewPortIfOutside" }); //実際に見えている範囲より-1された範囲がvisibleRangeとして認識される
+  }
+}
 
-//     let diff = 0;
-//     diff = editor.visibleRanges[i].start.line - line + 1;
-//     if (diff > 0) {
-//       editor.revealRange(
-//         new vscode.Range(
-//           subLimit(editor.visibleRanges[i].start.line, diff),
-//           0,
-//           subLimit(editor.visibleRanges[i].end.line, diff),
-//           0
-//         ),
-//         type
-//       );
-//       continue;
-//     }
-//     diff = line - editor.visibleRanges[i].end.line + 1;
-//     if (diff > 0) {
-//       editor.revealRange(
-//         new vscode.Range(
-//           addLimit(editor.visibleRanges[i].start.line, diff, editor.document.lineCount),
-//           0,
-//           addLimit(editor.visibleRanges[i].end.line, diff, editor.document.lineCount),
-//           0
-//         ),
-//         type
-//       );
-//     }
-//   }
-// }
+async function cursorToCenter(editor) {
+  await vscode.commands.executeCommand("revealLine", { lineNumber: editor.selection.active.line, at: "center" });
+}
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -769,8 +728,8 @@ function getTextDocumentChangeEventInfo(event, separator = "\n") {
     result += `range: \n${getRangeInfo(contentChange.range)}${separator}`;
     result += `rangeLength: ${contentChange.rangeLength}${separator}`;
     result += `rangeOffset: ${contentChange.rangeOffset}${separator}`;
-    result += `psitionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
-    result += `psitionAt: ${getPositionInfo(
+    result += `positionAt: ${getPositionInfo(event.document.positionAt(contentChange.rangeOffset), ", ")}${separator}`;
+    result += `positionAt: ${getPositionInfo(
       event.document.positionAt(contentChange.rangeOffset + contentChange.rangeLength),
       ", "
     )}${separator}`;
@@ -790,10 +749,28 @@ function getRangeInfo(range, separator = "\n") {
   return result;
 }
 
-function getPositionInfo(position, separator = "\n") {
+function getPositionInfo(position, separator = "\n", label = true) {
   let result = "";
-  result += `line: ${position.line}${separator}`;
-  result += `character: ${position.character}`;
+  let lineLabel = "line: ";
+  let characterLabel = "character: ";
+  if (label === false) {
+    lineLabel = "";
+    characterLabel = "";
+  }
+
+  result += `${lineLabel}${position.line}${separator}`;
+  result += `${characterLabel}${position.character}`;
+  return result;
+}
+
+function getSelectionsInfo(selections, sep = "\n") {
+  let result = "";
+  for (const selection of selections) {
+    result += `selection.start: ${getPositionInfo(selection.start, ", ", false)} -- `;
+    result += `selection.end:  ${getPositionInfo(selection.end, ", ", false)}${sep}`;
+    result += `selection.anchor:  ${getPositionInfo(selection.anchor, ", ", false)} -- `;
+    result += `selection.active:  ${getPositionInfo(selection.active, ", ", false)}`;
+  }
   return result;
 }
 
@@ -823,11 +800,12 @@ exports.arrayReplace = arrayReplace;
 exports.limitPop = limitPop;
 exports.limitShift = limitShift;
 exports.slice2d = slice2d;
-exports.concat2d = concat2d;
+
 exports.arrayReplace2d = arrayReplace2d;
-exports.splitIncludeSepatator = splitIncludeSepatator;
+exports.splitIncludeSeparator = splitIncludeSeparator;
 
 exports.revealCursor = revealCursor;
+exports.cursorToCenter = cursorToCenter;
 exports.registerCommand = registerCommand;
 exports.getTextDocument = getTextDocument;
 exports.uriToString = uriToString;
@@ -850,3 +828,4 @@ exports.getEol = getEol;
 // exports.getEditorInfo = getEditorInfo;
 // exports.getRangeInfo = getRangeInfo;
 exports.getTextDocumentChangeEventInfo = getTextDocumentChangeEventInfo;
+exports.getSelectionsInfo = getSelectionsInfo;
