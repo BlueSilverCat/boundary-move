@@ -499,15 +499,16 @@ class DocumentBoundary {
     }
 
     const result = [];
-    for (const boundary of this.lineBoundaries[lineIndex]) {
-      if (boundary.start + boundary.length <= start) {
+    const boundary = this.lineBoundaries[lineIndex];
+    for (let i = 0; i < boundary.length; ++i) {
+      if (boundary[i].start + boundary[i].length <= start) {
         continue;
       }
-      if (boundary.start >= end) {
+      if (boundary[i].start >= end) {
         break;
       }
 
-      const work = Object.assign({}, boundary);
+      const work = Object.assign({}, boundary[i]);
       if (work.start < start) {
         work.length -= start - work.start;
         work.start = start;
@@ -516,11 +517,21 @@ class DocumentBoundary {
         work.length = end - work.start;
       }
       if (work.shortValue === "CCL") {
-        if (work.start === boundary.start && work.length === 1) {
+        if (work.start === boundary[i].start && work.length === 1) {
           work.shortValue = "Lu";
-        } else if (work.start > boundary.start) {
+        } else if (work.start > boundary[i].start) {
           work.shortValue = "Ll";
         }
+      } else if (
+        this.CapitalLetter === true &&
+        work.shortValue === "Lu" &&
+        work.length === 1 &&
+        work.start === boundary[i].start + boundary[i].length - 1 &&
+        boundary[i + 1].shortValue === "Ll"
+      ) {
+        work.shortValue = "CCL";
+        work.length += boundary[i + 1].length;
+        i++;
       }
       result.push(work);
     }
@@ -580,7 +591,7 @@ class DocumentBoundary {
     if (result.length !== 0) {
       tail = result[result.length - 1];
       if (
-        (tail.shortValue === data[0].shortValue && tail.shortValue !== "SPC") ||
+        (tail.shortValue === data[0].shortValue && tail.shortValue !== "SPC" && tail.shortValue !== "CCL") ||
         (tail.shortValue === "CCL" && data[0].shortValue === "Ll")
       ) {
         tail.length += data[0].length;
@@ -643,7 +654,8 @@ class DocumentBoundary {
       return result;
     }
     boundaries2[0] = DocumentBoundary.check(boundaries2[0]);
-    result = result.concat(boundaries2);
+    // result = result.concat(boundaries2);
+    Array.prototype.push.apply(result, boundaries2); // test どちらが速いか?
     return result;
   }
 }
