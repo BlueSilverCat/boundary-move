@@ -804,6 +804,7 @@ exports.slice2d = slice2d;
 exports.arrayReplace2d = arrayReplace2d;
 exports.splitIncludeSeparator = splitIncludeSeparator;
 
+exports.revealLine = revealLine;
 exports.revealCursor = revealCursor;
 exports.cursorToCenter = cursorToCenter;
 exports.registerCommand = registerCommand;
