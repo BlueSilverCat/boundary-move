@@ -11,6 +11,8 @@ const COMMANDS = [
   "BM.info",
   "BM.jump",
   "BM.jumpLine",
+  "BM.selectJump",
+  "BM.selectJumpLine",
 ];
 const ROOT_URI = vscode.workspace.workspaceFolders[0].uri;
 

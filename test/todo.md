@@ -96,9 +96,10 @@ for (let i = 0; i < result.length; i++) {
 
 # todo
 
-scroll 水平スクロール機能を修正しないと
+test の更新
+scroll 水平スクロール機能の修正
 jump もう少し使い勝手を良くしたい
-change symbol rename で変更を正しく検出できなかった時があった
+change 速くする
 
 ---
 

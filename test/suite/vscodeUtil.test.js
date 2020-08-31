@@ -241,17 +241,17 @@ describe("VscodeUtil Test Suite 2", function () {
     });
   });
 
-  describe("revealCursor", function () {
+  describe("revealLine", function () {
     it("test", async function () {
       // await vscode.commands.executeCommand("workbench.action.zoomReset")
       // await vscode.commands.executeCommand("editor.action.fontZoomReset")
       editor = await vscode.window.showTextDocument(document);
       editor.selection = new vscode.Selection(80, 0, 80, 0);
-      await vscodeUtil.revealCursor(editor);
+      await vscodeUtil.revealLine(editor);
       // assert.strictEqual(editor.visibleRanges[0].start.line, 55);
       assert.strictEqual(editor.visibleRanges[0].end.line, 81);
       editor.selection = new vscode.Selection(20, 0, 20, 0);
-      await vscodeUtil.revealCursor(editor);
+      await vscodeUtil.revealLine(editor);
       assert.strictEqual(editor.visibleRanges[0].start.line, 20);
       // assert.strictEqual(editor.visibleRanges[0].end.line, 46);
     });
@@ -261,9 +261,9 @@ describe("VscodeUtil Test Suite 2", function () {
     it("test", async function () {
       const context = { subscriptions: [] };
       // @ts-ignore
-      vscodeUtil.registerCommand(context, "command1", () => { });
+      vscodeUtil.registerCommand(context, "command1", () => {});
       // @ts-ignore
-      vscodeUtil.registerCommand(context, "command2", () => { });
+      vscodeUtil.registerCommand(context, "command2", () => {});
       const commands = await vscode.commands.getCommands();
       assert.strictEqual(context.subscriptions.length, 2);
       assert.strictEqual(commands.includes("command1"), true);

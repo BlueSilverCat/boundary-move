@@ -69,12 +69,17 @@ const CONFIG_DEFAULT_DB = {
   SpecialCharacters: "\"'`",
   CapitalLetter: true,
   Japanese: false,
+  AlwaysCenter: false,
+  JumpToCenter: false,
 };
 
 const CONFIG_DEFAULT_BM = {
   SpecialCharacters: "\"'`",
   CapitalLetter: true,
   Japanese: false,
+  JumpZoomOutLevel: 1,
+  AlwaysCenter: false,
+  JumpToCenter: false,
   MarkerMargin: "0ex 0.3ex 0ex 0.7ex",
 };
 
@@ -95,6 +100,9 @@ const currentConfig = {
   SpecialCharacters: "\"'`",
   CapitalLetter: true,
   Japanese: false,
+  JumpZoomOutLevel: 1,
+  AlwaysCenter: false,
+  JumpToCenter: false,
   MarkerMargin: "0ex 0.3ex 0ex 0.7ex",
 };
 
@@ -102,12 +110,18 @@ function getConfig(wsConfig, config) {
   config.SpecialCharacters = wsConfig.get("specialCharacters");
   config.CapitalLetter = wsConfig.get("capitalLetter");
   config.Japanese = wsConfig.get("japanese");
+  config.JumpZoomOutLevel = wsConfig.get("jumpZoomOutLevel");
+  config.AlwaysCenter = wsConfig.get("alwaysCenter");
+  config.JumpToCenter = wsConfig.get("jumpToCenter");
   config.MarkerMargin = wsConfig.get("markerMargin");
 }
 async function setConfig(wsConfig, config) {
   await wsConfig.update("specialCharacters", config.SpecialCharacters);
   await wsConfig.update("capitalLetter", config.CapitalLetter);
   await wsConfig.update("japanese", config.Japanese);
+  await wsConfig.update("jumpZoomOutLevel", config.JumpZoomOutLevel);
+  await wsConfig.update("alwaysCenter", config.AlwaysCenter);
+  await wsConfig.update("jumpToCenter", config.JumpToCenter);
   await wsConfig.update("markerMargin", config.MarkerMargin);
 }
 
@@ -130,6 +144,13 @@ let channel = null;
 
 describe("Boundary Test", function () {
   //this.timeout(0);
+  before(async function () {
+    getConfig(vscode.workspace.getConfiguration("boundaryMove"), currentConfig);
+    await setConfig(vscode.workspace.getConfiguration("boundaryMove"), CONFIG_DEFAULT_BM);
+  });
+  after(async function () {
+    await setConfig(vscode.workspace.getConfiguration("boundaryMove"), currentConfig);
+  });
 
   beforeEach(async function () {
     ({ db, document, editor } = await prepare1("boundary01.txt"));
@@ -175,6 +196,8 @@ describe("Boundary Test", function () {
           SpecialCharacters: "abc",
           CapitalLetter: false,
           Japanese: false,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         db.setConfig(config);
         assert.deepStrictEqual(db.SpecialRegex, {
@@ -184,11 +207,15 @@ describe("Boundary Test", function () {
         });
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
 
         config = {
           SpecialCharacters: "012",
           CapitalLetter: true,
           Japanese: true,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         db.setConfig(config);
         assert.deepStrictEqual(db.SpecialRegex, {
@@ -198,6 +225,8 @@ describe("Boundary Test", function () {
         });
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
       });
     });
 
@@ -529,45 +558,6 @@ describe("Boundary Test", function () {
       });
     });
 
-    // describe("modify", function () {
-    //   beforeEach(async function () {
-    //     ({ db, document, editor } = await prepare1("boundary01.txt"));
-    //   });
-
-    //   it("no change", function () {
-    //     const length = db.lineBoundaries.length;
-    //     db.modify(0, 1);
-    //     assert.strictEqual(db.lineBoundaries.length, length);
-    //   });
-
-    //   it("delete", function () {
-    //     const length = db.lineBoundaries.length;
-    //     db.modify(-1, 1);
-    //     assert.strictEqual(db.lineBoundaries.length, length - 1);
-    //     const expected = Array.from(BOUNDARY01);
-    //     expected.splice(1, 1);
-    //     assert.deepStrictEqual(db.lineBoundaries, expected);
-    //   });
-
-    //   it("add", async function () {
-    //     const length = db.lineBoundaries.length;
-    //     db.modify(1, 1);
-    //     assert.strictEqual(db.lineBoundaries.length, length + 1);
-    //     const expected = Array.from(BOUNDARY01);
-    //     expected.splice(1, 0, ...new Array(1));
-    //     assert.deepStrictEqual(db.lineBoundaries, expected);
-    //   });
-    // });
-
-    // describe("changeLine", function () {
-    //   it("test", async function () {
-    //     ({ db, document, editor } = await prepare1("boundary01.txt"));
-    //     db.lineBoundaries = new Array(4);
-    //     db.changeLines(document, { start: 0, end: 3 });
-    //     assert.deepStrictEqual(db.lineBoundaries, BOUNDARY01);
-    //   });
-    // });
-
     describe("getLineInfo", function () {
       it("test", async function () {
         ({ db, document, editor } = await prepare1("boundary01.txt"));
@@ -807,12 +797,16 @@ describe("Boundary Test", function () {
           SpecialCharacters: "",
           CapitalLetter: false,
           Japanese: false,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         ({ db, document, editor } = await prepare1("CapitalLetter.txt", config));
         assert.deepStrictEqual(db.uri, document.uri);
         assert.deepStrictEqual(db.SpecialRegex, null);
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
         assert.deepStrictEqual(db.lineBoundaries, [
           [
             b("Lu", 0, 1),
@@ -834,12 +828,16 @@ describe("Boundary Test", function () {
           SpecialCharacters: "",
           CapitalLetter: true,
           Japanese: false,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         ({ db, document, editor } = await prepare1("CapitalLetter.txt", config));
         assert.deepStrictEqual(db.uri, document.uri);
         assert.deepStrictEqual(db.SpecialRegex, null);
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
         assert.deepStrictEqual(db.lineBoundaries, [
           [
             b("CCL", 0, 3),
@@ -861,12 +859,16 @@ describe("Boundary Test", function () {
           SpecialCharacters: "",
           CapitalLetter: false,
           Japanese: false,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         ({ db, document, editor } = await prepare1("Japanese.txt", config));
         assert.deepStrictEqual(db.uri, document.uri);
         assert.deepStrictEqual(db.SpecialRegex, null);
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
         assert.deepStrictEqual(db.lineBoundaries, [
           [b("Lo", 0, 2), b("Po", 2, 1), b("Lo", 3, 9), b("Po", 12, 1), b("EOL", 13, 1)],
         ]);
@@ -877,12 +879,16 @@ describe("Boundary Test", function () {
           SpecialCharacters: "",
           CapitalLetter: false,
           Japanese: true,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         ({ db, document, editor } = await prepare1("Japanese.txt", config));
         assert.deepStrictEqual(db.uri, document.uri);
         assert.deepStrictEqual(db.SpecialRegex, null);
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
         assert.deepStrictEqual(db.lineBoundaries, [
           [
             b("Hani", 0, 1),
@@ -905,12 +911,16 @@ describe("Boundary Test", function () {
           SpecialCharacters: "",
           CapitalLetter: false,
           Japanese: false,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         ({ db, document, editor } = await prepare1("SpecialCharacters.txt", config));
         assert.deepStrictEqual(db.uri, document.uri);
         assert.deepStrictEqual(db.SpecialRegex, null);
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
         assert.deepStrictEqual(db.lineBoundaries, [
           [
             b("Po", 0, 2),
@@ -927,11 +937,13 @@ describe("Boundary Test", function () {
         ]);
       });
 
-      it("\"'`[]-\\^", async function () {
+      it("default", async function () {
         config = {
           SpecialCharacters: "\"'`[]-\\^",
           CapitalLetter: false,
           Japanese: false,
+          AlwaysCenter: false,
+          JumpToCenter: false,
         };
         ({ db, document, editor } = await prepare1("SpecialCharacters.txt", config));
         assert.deepStrictEqual(db.uri, document.uri);
@@ -942,6 +954,8 @@ describe("Boundary Test", function () {
         });
         assert.deepStrictEqual(db.CapitalLetter, config.CapitalLetter);
         assert.deepStrictEqual(db.Japanese, config.Japanese);
+        assert.deepStrictEqual(db.AlwaysCenter, config.AlwaysCenter);
+        assert.deepStrictEqual(db.JumpToCenter, config.JumpToCenter);
         assert.deepStrictEqual(db.lineBoundaries, [
           [
             b("SPC", 0, 1),
@@ -1119,14 +1133,14 @@ describe("Boundary Test", function () {
       assert.deepStrictEqual(actual, []);
     });
 
-    it("Capital letter generete", function () {
+    it("Capital letter generate", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
       const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
       assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("CCL", 2, 3), b("Nd", 5, 2)]);
     });
 
-    it("Capital letterfalse", function () {
+    it("Capital letter false", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
       const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
@@ -1707,15 +1721,25 @@ describe("BoundaryManager", function () {
     });
   });
 
-  describe("jump", function () {
+  describe.skip("jump", function () {
     beforeEach(async function () {
       ({ bm, channel, config, document, editor } = await prepare2("moveTest.txt"));
       bm.add(document);
     });
-    it("test", async function () {
+    it("no select input bb", async function () {
+      this.timeout(0);
       editor.selection = new vscode.Selection(1, 0, 1, 0);
-      let expected = new vscode.Selection(2, 2, 2, 2);
-      bm.jump(editor, 0, 2, 1);
+      let expected = new vscode.Selection(1, 2, 1, 2);
+      await bm.jump(editor, false);
+      assert.strictEqual(bm.documentBoundaries.length, 1);
+      assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, BOUNDARY_MOVETEST);
+      assert.deepStrictEqual(editor.selection, expected);
+    });
+    it("select input bb", async function () {
+      this.timeout(0);
+      editor.selection = new vscode.Selection(1, 0, 1, 0);
+      let expected = new vscode.Selection(1, 0, 1, 2);
+      await bm.jump(editor, true);
       assert.strictEqual(bm.documentBoundaries.length, 1);
       assert.deepStrictEqual(bm.documentBoundaries[0].lineBoundaries, BOUNDARY_MOVETEST);
       assert.deepStrictEqual(editor.selection, expected);
