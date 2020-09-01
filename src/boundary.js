@@ -547,6 +547,9 @@ class DocumentBoundary {
     }
 
     const result = this.lineBoundaries.slice(startRow, endRow + 1);
+    if (result.length === 0) {
+      return result;
+    }
     let end = 0;
     let len = this.getLineLength(startRow);
     if (startRow === endRow) {
