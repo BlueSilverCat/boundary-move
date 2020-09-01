@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.3.1] 2020/09/01
+
+### [Fixed]
+
+- Fix slice Capital letter && concat Capital letter.
+
 ## [0.3.0] 2020/08/31
 
 ### [Added]
