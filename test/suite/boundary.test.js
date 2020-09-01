@@ -1094,78 +1094,78 @@ describe("Boundary Test", function () {
     it("test01", function () {
       const boundaries = [b("Nd", 0, 2), b("Ll", 2, 2)];
       const data = [b("Nd", 0, 2), b("Ll", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Ll", 2, 2), b("Nd", 4, 2), b("Ll", 6, 2)]);
     });
 
     it("test02", function () {
       const boundaries = [b("Nd", 0, 2), b("Ll", 2, 2)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 4), b("Nd", 6, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Ll", 2, 4), b("Nd", 6, 2)]);
     });
 
     it("test03", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 1), b("Ll", 3, 2), b("Nd", 5, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Lu", 2, 1), b("Ll", 3, 2), b("Nd", 5, 2)]);
     });
 
     it("concat data to empty", function () {
       const boundaries = [];
       const data = [b("Ll", 2, 2), b("Nd", 4, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, [b("Ll", 0, 2), b("Nd", 2, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, [b("Ll", 0, 2), b("Nd", 2, 2)]);
     });
 
     it("concat empty", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 1)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Lu", 2, 1)]);
     });
 
     it("concat empty to empty", function () {
       const boundaries = [];
       const data = [];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, []);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, []);
     });
 
     it("Capital letter generate", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("CCL", 2, 3), b("Nd", 5, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("CCL", 2, 3), b("Nd", 5, 2)]);
     });
 
     it("Capital letter false", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, false);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 1), b("Ll", 3, 2), b("Nd", 5, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, false);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Lu", 2, 1), b("Ll", 3, 2), b("Nd", 5, 2)]);
     });
 
     it("Capital letter split", function () {
       const boundaries = [b("Nd", 0, 2), b("Lu", 2, 1)];
       const data = [b("CCL", 0, 2), b("Nd", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Lu", 2, 2), b("Ll", 4, 1), b("Nd", 5, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Lu", 2, 2), b("Ll", 4, 1), b("Nd", 5, 2)]);
     });
 
     it("Capital letter extend", function () {
       const boundaries = [b("Nd", 0, 2), b("CCL", 2, 4)];
       const data = [b("Ll", 0, 2), b("Nd", 2, 2)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("CCL", 2, 6), b("Nd", 8, 2)]);
+      boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("CCL", 2, 6), b("Nd", 8, 2)]);
     });
 
     it("Special Characters", function () {
       const boundaries = [b("SPC", 0, 1), b("CCL", 1, 4), b("SPC", 5, 1), b("SPC", 6, 1), b("SPC", 7, 1)];
       const data = [b("SPC", 0, 1), b("Nd", 1, 2), b("SPC", 3, 1)];
-      const actual = boundary.DocumentBoundary.concatLine(boundaries, data, true);
-      assert.deepStrictEqual(actual, [
+      boundary.DocumentBoundary.concatLine(boundaries, data, true);
+      assert.deepStrictEqual(boundaries, [
         b("SPC", 0, 1),
         b("CCL", 1, 4),
         b("SPC", 5, 1),
@@ -1181,8 +1181,8 @@ describe("Boundary Test", function () {
   describe("check", function () {
     it("test01", function () {
       const boundaries = [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)];
-      const actual = boundary.DocumentBoundary.check(boundaries);
-      assert.deepStrictEqual(actual, [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)]);
+      boundary.DocumentBoundary.check(boundaries);
+      assert.deepStrictEqual(boundaries, [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)]);
     });
   });
 
@@ -1196,8 +1196,8 @@ describe("Boundary Test", function () {
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
       ];
-      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
-      assert.deepStrictEqual(actual, [
+      boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(boundaries1, [
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
@@ -1214,8 +1214,8 @@ describe("Boundary Test", function () {
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
       ];
-      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
-      assert.deepStrictEqual(actual, [
+      boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(boundaries1, [
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2), b("Nd", 8, 2), b("Ll", 10, 2), b("EOL", 12, 1)],
         [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
@@ -1228,8 +1228,8 @@ describe("Boundary Test", function () {
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
       ];
-      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
-      assert.deepStrictEqual(actual, [
+      boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(boundaries1, [
         [b("Nd", 0, 2), b("Ll", 2, 2), b("EOL", 4, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
       ]);
@@ -1241,8 +1241,8 @@ describe("Boundary Test", function () {
         [b("Nd", 4, 2), b("Ll", 6, 2)],
       ];
       const boundaries2 = [];
-      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
-      assert.deepStrictEqual(actual, [
+     boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(boundaries1, [
         [b("Nd", 4, 2), b("Ll", 6, 2), b("EOL", 8, 1)],
         [b("Nd", 4, 2), b("Ll", 6, 2)],
       ]);
@@ -1251,8 +1251,8 @@ describe("Boundary Test", function () {
     it("concat empty to empty", function () {
       const boundaries1 = [];
       const boundaries2 = [];
-      const actual = boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
-      assert.deepStrictEqual(actual, []);
+      boundary.DocumentBoundary.concat(boundaries1, boundaries2, false);
+      assert.deepStrictEqual(boundaries1, []);
     });
 
     it.skip("error concat empty to empty", function () {
