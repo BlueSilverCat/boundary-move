@@ -443,10 +443,10 @@ class DocumentBoundary {
       index = DocumentBoundary.getMiddle(left, right, type);
       result = compare(array[index], target, index, left, right, type);
       if (result.length === 0) {
-        if (type !== "eq") {
+        // if (type !== "eq") {
           return index;
-        }
-        return -1;
+        // }
+        // return -1;
       } else if (type === "eq" && result.length === 1) {
         return result[0]; //index
       }
@@ -547,6 +547,9 @@ class DocumentBoundary {
     }
 
     const result = this.lineBoundaries.slice(startRow, endRow + 1);
+    if (result.length === 0) {
+      return result;
+    }
     let end = 0;
     let len = this.getLineLength(startRow);
     if (startRow === endRow) {

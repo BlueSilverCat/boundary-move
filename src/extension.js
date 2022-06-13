@@ -125,7 +125,6 @@ function activate(context) {
     bm.jumpLine(editor, true);
   }
 }
-exports.activate = activate;
 
 function deactivate() {}
 
